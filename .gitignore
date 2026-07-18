@@ -1,0 +1,29 @@
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+
+# Databases
+*.db
+*.sqlite3
+chroma_db/
+backend/audit_log.db
+
+# Machine Learning
+*.pkl
+ml_models/
+backend/data/raw/
+
+# Node
+node_modules/
+.npm/
+
+# IDE
+.vscode/
+.idea/
