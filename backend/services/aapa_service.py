@@ -1,172 +1,134 @@
-"""
-CyberShield AI — AAPA Service
-APT attribution via cosine similarity + Markov chain next-move prediction.
-"""
+import os
+import json
+import chromadb
+from anthropic import Anthropic
+from typing import Dict, Any, List
+from dotenv import load_dotenv
 
-import numpy as np
-from datetime import datetime, timezone
-from typing import List, Optional, Dict, Any
+from data.mitre_attack import ATTACK_TECHNIQUES, THREAT_ACTORS
 
-from data.mitre_attack import THREAT_ACTORS, ATTACK_TECHNIQUES, THREAT_ACTORS_BY_ID
-from models import ThreatActor, Attribution, NextMove, TTpAnalysisResponse
+load_dotenv()
 
-# Default observed TTPs for demo (the active APT41 incident)
-DEFAULT_OBSERVED_TTPS = ["T1566.001", "T1059.003", "T1055", "T1021.002", "T1070.004"]
+class AAPAService:
+    """
+    Advanced Attribution & Prediction Agent (AAPA)
+    Phase 2 RAG Implementation: Uses Chroma DB for retrieving MITRE ATT&CK techniques
+    and Anthropic Claude API for reasoning and citation.
+    """
+    def __init__(self):
+        self._init_chroma()
+        self.api_key = os.environ.get("ANTHROPIC_API_KEY", "")
+        self.anthropic = Anthropic(api_key=self.api_key) if self.api_key else None
 
-# Full TTP universe for vector building
-ALL_TTPS = sorted(ATTACK_TECHNIQUES.keys())
+    def _init_chroma(self):
+        """Initialise local Chroma DB and load the curated MITRE ATT&CK corpus."""
+        print("Initializing Chroma DB for AAPA RAG...")
+        self.chroma_client = chromadb.PersistentClient(path="./chroma_db")
+        self.collection = self.chroma_client.get_or_create_collection(name="mitre_attck_corpus")
+        
+        # Check if already populated to avoid re-embedding
+        if self.collection.count() == 0:
+            print("Populating Chroma DB with MITRE ATT&CK STIX subset...")
+            ids = []
+            documents = []
+            metadatas = []
+            
+            for ttp_id, desc in ATTACK_TECHNIQUES.items():
+                ids.append(ttp_id)
+                documents.append(f"{ttp_id}: {desc}")
+                metadatas.append({"source": "mitre/cti", "technique_id": ttp_id})
+                
+            self.collection.add(
+                documents=documents,
+                metadatas=metadatas,
+                ids=ids
+            )
+            print(f"Loaded {len(ids)} techniques into Chroma DB.")
 
+    def analyze_entity(self, entity: Dict[str, Any], alerts: List[Dict]) -> Dict[str, Any]:
+        """
+        RAG Pipeline:
+        1. Query Chroma with entity features and recent alerts.
+        2. Retrieve top-k techniques.
+        3. Pass to Claude for justification and next-stage prediction.
+        """
+        # Fallback state if API key is missing
+        if not self.anthropic:
+            return {
+                "attributed_actor": "Unknown (Attribution Unavailable)",
+                "confidence": 0.0,
+                "current_ttps": [],
+                "predicted_next_ttps": [],
+                "justification": "Attribution unavailable: ANTHROPIC_API_KEY is not configured.",
+                "status": "fallback"
+            }
 
-def _build_ttp_vector(ttps: List[str]) -> np.ndarray:
-    """Convert a list of TTP IDs into a binary indicator vector over ALL_TTPS."""
-    vec = np.zeros(len(ALL_TTPS))
-    for i, t in enumerate(ALL_TTPS):
-        if t in ttps:
-            vec[i] = 1.0
-    return vec
+        # 1. Build Query
+        features = entity.get("features", {})
+        alert_desc = " ".join([a["description"] for a in alerts[:3]])
+        query_text = f"Entity {entity['id']} of type {entity['type']} shows anomalies. Features: {json.dumps(features)}. Alerts: {alert_desc}"
 
-
-def _cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
-    na, nb = np.linalg.norm(a), np.linalg.norm(b)
-    if na == 0 or nb == 0:
-        return 0.0
-    return float(np.dot(a, b) / (na * nb))
-
-
-def get_threat_actors() -> List[ThreatActor]:
-    return [
-        ThreatActor(
-            id=actor["id"],
-            name=actor["name"],
-            aliases=actor["aliases"],
-            origin=actor["origin"],
-            motivation=actor["motivation"],
-            targets=actor["targets"],
-            ttps=actor["ttps"],
-            campaigns=actor["campaigns"],
-            confidence=actor["confidence"],
-            last_seen=actor["last_seen"],
-            description=actor["description"],
-            iocs=actor.get("iocs", []),
+        # 2. Retrieve Top-K Techniques from Chroma
+        results = self.collection.query(
+            query_texts=[query_text],
+            n_results=3
         )
-        for actor in THREAT_ACTORS
-    ]
+        
+        retrieved_docs = results["documents"][0] if results["documents"] else []
+        retrieved_ids = results["ids"][0] if results["ids"] else []
+        
+        context = "\n".join(retrieved_docs)
+        
+        # 3. Claude Prompt Pipeline
+        prompt = f"""You are a senior cybersecurity analyst. Based on the following retrieved MITRE ATT&CK techniques and the anomalous entity profile, determine the most likely attribution, provide a cited justification, and predict the next stage technique.
+        
+Retrieved ATT&CK Context:
+{context}
 
+Entity Anomaly Profile:
+{query_text}
 
-def get_attribution_hypotheses(observed_ttps: Optional[List[str]] = None) -> List[Attribution]:
-    if not observed_ttps:
-        observed_ttps = DEFAULT_OBSERVED_TTPS
+Respond ONLY with a valid JSON object matching exactly this schema:
+{{
+    "attributed_actor": "String (e.g., APT41, Lazarus Group, or Unknown)",
+    "confidence": Float (0.0 to 100.0),
+    "current_ttps": ["List of cited technique IDs (e.g., T1078, T1110)"],
+    "predicted_next_ttps": ["List of 1 or 2 technique IDs the actor might try next"],
+    "justification": "String (Detailed reasoning citing specific technique IDs from the context matching the entity features)"
+}}"""
 
-    obs_vec = _build_ttp_vector(observed_ttps)
-    results = []
+        try:
+            response = self.anthropic.messages.create(
+                model="claude-3-haiku-20240307",
+                max_tokens=500,
+                temperature=0.2,
+                system="You are CyberShield AI Attribution Engine. Always output strictly valid JSON.",
+                messages=[
+                    {"role": "user", "content": prompt}
+                ]
+            )
+            
+            result_json = response.content[0].text
+            # Simple cleanup in case Claude adds markdown blocks
+            if "```json" in result_json:
+                result_json = result_json.split("```json")[1].split("```")[0].strip()
+            elif "```" in result_json:
+                result_json = result_json.split("```")[1].strip()
+                
+            attribution = json.loads(result_json)
+            attribution["status"] = "success"
+            return attribution
+            
+        except Exception as e:
+            # Fallback on failure
+            print(f"Claude API Error: {e}")
+            return {
+                "attributed_actor": "Unknown (Attribution Unavailable)",
+                "confidence": 0.0,
+                "current_ttps": retrieved_ids,
+                "predicted_next_ttps": [],
+                "justification": f"Attribution unavailable: Inference failed ({str(e)}). Retrieved raw TTPs: {retrieved_ids}",
+                "status": "fallback"
+            }
 
-    for actor in THREAT_ACTORS:
-        actor_vec = _build_ttp_vector(actor["ttps"])
-        raw_sim = _cosine_similarity(obs_vec, actor_vec)
-
-        # Apply context multiplier: higher if actor is known to target India CNI
-        context_bonus = 1.15 if "Healthcare" in actor["targets"] or "Government" in actor["targets"] else 1.0
-        confidence = round(min(100.0, raw_sim * 100 * context_bonus), 1)
-
-        matched = [t for t in observed_ttps if t in actor["ttps"]]
-        unmatched = [t for t in observed_ttps if t not in actor["ttps"]]
-
-        # Generate next moves
-        next_moves = _get_next_moves_for_actor(actor, observed_ttps)
-
-        evidence = (
-            f"Matched {len(matched)}/{len(observed_ttps)} observed TTPs against {actor['name']} profile. "
-            f"Strongest matches: {', '.join(matched[:3])}. "
-            f"Known campaigns targeting Indian CNI: {', '.join(actor['campaigns'][:2])}."
-        )
-
-        results.append(Attribution(
-            actor_id=actor["id"],
-            actor_name=actor["name"],
-            origin=actor["origin"],
-            confidence=confidence,
-            matched_ttps=matched,
-            unmatched_ttps=unmatched,
-            predicted_next_moves=[nm.dict() for nm in next_moves],
-            evidence=evidence,
-        ))
-
-    results.sort(key=lambda a: a.confidence, reverse=True)
-    for i, r in enumerate(results):
-        r.rank = i + 1
-    return results
-
-
-def _get_next_moves_for_actor(actor: Dict, observed_ttps: List[str]) -> List[NextMove]:
-    """Use Markov chain to predict top 3 next moves."""
-    transitions = actor.get("markov_transitions", {})
-    next_prob: Dict[str, float] = {}
-
-    # Aggregate transition probabilities from all observed TTPs
-    for ttp in observed_ttps:
-        if ttp in transitions:
-            for next_ttp, prob in transitions[ttp].items():
-                if next_ttp not in observed_ttps:  # Only predict TTPs not yet seen
-                    next_prob[next_ttp] = max(next_prob.get(next_ttp, 0), prob)
-
-    # Sort by probability and take top 3
-    top3 = sorted(next_prob.items(), key=lambda x: x[1], reverse=True)[:3]
-
-    moves = []
-    for ttp_id, prob in top3:
-        technique = ATTACK_TECHNIQUES.get(ttp_id, {})
-        urgency = "immediate" if prob >= 0.6 else ("high" if prob >= 0.4 else "medium")
-        moves.append(NextMove(
-            ttp_id=ttp_id,
-            ttp_name=technique.get("name", ttp_id),
-            tactic=technique.get("tactic", "Unknown"),
-            probability=round(prob, 2),
-            description=technique.get("description", "Predicted next attacker action."),
-            recommendation=_get_recommendation(ttp_id),
-            urgency=urgency,
-        ))
-    return moves
-
-
-def _get_recommendation(ttp_id: str) -> str:
-    recs = {
-        "T1486": "Immediately back up all critical data and verify offline backups are intact. Deploy ransomware honeypots.",
-        "T1003.001": "Enable Credential Guard. Monitor LSASS access. Enforce Windows Defender Credential Guard.",
-        "T1041": "Block egress to unknown IPs. Enable DLP. Capture outbound traffic for analysis.",
-        "T1078": "Rotate all privileged credentials. Enable MFA for all accounts. Review recent logon events.",
-        "T1055": "Block unsigned code injection. Enable kernel-level EDR. Review process injection alerts.",
-        "T1547.001": "Audit startup locations. Monitor Run keys. Deploy application whitelisting.",
-        "T1053.005": "Audit scheduled tasks. Block task creation by non-admin users.",
-        "T1021.002": "Enforce SMB signing. Disable NTLM. Segment file servers from workstations.",
-        "T1059.001": "Enable PowerShell Constrained Language Mode. Log all PowerShell activity to SIEM.",
-        "T1059.003": "Enable command line auditing (Event 4688). Alert on cmd.exe spawned by Office apps.",
-    }
-    return recs.get(ttp_id, "Monitor for this technique. Enable relevant detections in your EDR/SIEM.")
-
-
-def get_next_moves(actor_id: str) -> List[NextMove]:
-    actor = THREAT_ACTORS_BY_ID.get(actor_id)
-    if not actor:
-        return []
-    return _get_next_moves_for_actor(actor, DEFAULT_OBSERVED_TTPS)
-
-
-def analyze_ttps(ttp_list: List[str]) -> TTpAnalysisResponse:
-    attributions = get_attribution_hypotheses(ttp_list)
-    top_actor = THREAT_ACTORS_BY_ID.get(attributions[0].actor_id) if attributions else None
-    next_moves = _get_next_moves_for_actor(top_actor, ttp_list) if top_actor else []
-
-    top_conf = attributions[0].confidence if attributions else 0
-    summary = (
-        f"Analysis of {len(ttp_list)} observed TTPs completed. "
-        f"Primary attribution: {attributions[0].actor_name} ({top_conf}% confidence). "
-        f"{'High confidence — immediate action recommended.' if top_conf >= 70 else 'Medium confidence — gather more indicators.'}"
-    )
-
-    return TTpAnalysisResponse(
-        observed_ttps=ttp_list,
-        attributions=attributions,
-        next_moves=next_moves,
-        confidence_summary=summary,
-        analysis_timestamp=datetime.now(timezone.utc).isoformat(),
-    )
+aapa_service = AAPAService()
