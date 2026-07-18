@@ -55,7 +55,7 @@
 
 ---
 
-## 🚨 Problem Statement
+## Problem Statement
 
 India's Critical National Infrastructure (CNI) — hospitals, power grids, educational institutions, financial systems — is under **sustained, sophisticated cyberattack**.
 
