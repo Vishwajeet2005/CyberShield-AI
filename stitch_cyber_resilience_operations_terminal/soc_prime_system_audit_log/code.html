@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SOC-PRIME - Audit Log</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-variant": "#353434",
+                      "on-tertiary": "#342f2d",
+                      "surface-tint": "#c6c6c6",
+                      "inverse-surface": "#e5e2e1",
+                      "secondary-container": "#474747",
+                      "primary-fixed-dim": "#c6c6c6",
+                      "surface-dim": "#141313",
+                      "inverse-primary": "#5d5f5f",
+                      "on-primary-fixed-variant": "#454747",
+                      "secondary-fixed": "#e4e2e1",
+                      "surface-container-high": "#2a2a2a",
+                      "inverse-on-surface": "#313030",
+                      "on-tertiary-fixed-variant": "#4b4643",
+                      "on-surface-variant": "#c4c7c8",
+                      "surface-container-low": "#1c1b1b",
+                      "on-error": "#690005",
+                      "on-background": "#e5e2e1",
+                      "surface-container-lowest": "#0e0e0e",
+                      "outline": "#8e9192",
+                      "tertiary-fixed-dim": "#cdc5c1",
+                      "on-tertiary-container": "#67615e",
+                      "primary-fixed": "#e2e2e2",
+                      "background": "#141313",
+                      "on-secondary-fixed": "#1b1c1c",
+                      "on-secondary": "#303030",
+                      "on-secondary-container": "#b6b5b4",
+                      "secondary": "#c8c6c6",
+                      "outline-variant": "#444748",
+                      "surface-container-highest": "#353434",
+                      "on-primary-container": "#626363",
+                      "tertiary": "#fffbff",
+                      "on-primary": "#2f3131",
+                      "surface": "#141313",
+                      "secondary-fixed-dim": "#c8c6c6",
+                      "primary": "#fdfdfc",
+                      "on-primary-fixed": "#1a1c1c",
+                      "tertiary-fixed": "#eae1dd",
+                      "error": "#ffb4ab",
+                      "on-tertiary-fixed": "#1f1b19",
+                      "error-container": "#93000a",
+                      "primary-container": "#e0e0e0",
+                      "on-surface": "#e5e2e1",
+                      "surface-bright": "#3a3939",
+                      "tertiary-container": "#e7deda",
+                      "on-error-container": "#ffdad6",
+                      "surface-container": "#201f1f",
+                      "on-secondary-fixed-variant": "#474747"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "md": "16px",
+                      "lg": "24px",
+                      "sm": "8px",
+                      "xs": "4px",
+                      "margin": "16px",
+                      "xl": "32px",
+                      "unit": "4px",
+                      "gutter": "1px"
+              },
+              "fontFamily": {
+                      "body-lg": [
+                              "JetBrains Mono"
+                      ],
+                      "body-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "code-table": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-sm": [
+                              "JetBrains Mono"
+                      ],
+                      "label-caps": [
+                              "JetBrains Mono"
+                      ],
+                      "display-lg": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-md": [
+                              "JetBrains Mono"
+                      ]
+              },
+              "fontSize": {
+                      "body-lg": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "code-table": [
+                              "11px",
+                              {
+                                      "lineHeight": "14px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-sm": [
+                              "18px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-caps": [
+                              "10px",
+                              {
+                                      "lineHeight": "12px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "display-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-surface font-body-sm h-screen flex overflow-hidden selection:bg-surface-variant">
+<!-- SideNavBar -->
+<nav class="hidden md:flex flex-col border-r border-outline-variant h-screen fixed left-0 top-0 h-full w-64 bg-background z-20 font-code-table text-code-table">
+<div class="p-md border-b border-outline-variant">
+<div class="flex items-center gap-sm mb-sm">
+<span class="material-symbols-outlined text-primary">terminal</span>
+<span class="font-headline-sm text-headline-sm font-bold text-primary tracking-tighter">SOC-PRIME</span>
+</div>
+<div class="text-on-surface-variant font-code-table text-code-table">NODE-01.SYSTEM.RESILIENCE</div>
+</div>
+<div class="flex-1 overflow-y-auto py-sm">
+<a class="flex items-center gap-md px-md py-sm text-on-surface hover:bg-surface-container-high transition-none" href="#">
+<span class="material-symbols-outlined">security</span>
+<span>BADE</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface hover:bg-surface-container-high transition-none" href="#">
+<span class="material-symbols-outlined">shield</span>
+<span>AAPA</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface hover:bg-surface-container-high transition-none" href="#">
+<span class="material-symbols-outlined">memory</span>
+<span>AIRO</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface hover:bg-surface-container-high transition-none" href="#">
+<span class="material-symbols-outlined">visibility</span>
+<span>VPA</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-on-surface hover:bg-surface-container-high transition-none" href="#">
+<span class="material-symbols-outlined">analytics</span>
+<span>CRDT</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm bg-primary text-on-primary font-bold border-y border-outline transition-none" href="#">
+<span class="material-symbols-outlined">terminal</span>
+<span>AUDIT LOG</span>
+</a>
+</div>
+<div class="p-md border-t border-outline-variant">
+<button class="w-full border border-outline-variant bg-background text-on-surface hover:bg-primary hover:text-on-primary py-xs font-code-table text-code-table text-center transition-none">
+                [ SYSTEM REBOOT ]
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-64 relative min-w-0">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-12 px-md border-b border-outline-variant w-full bg-background z-10 sticky top-0 font-code-table text-code-table">
+<div class="font-label-caps text-label-caps font-bold text-primary truncate hidden sm:block">
+                SOC-PRIME // RESILIENCE PLATFORM
+            </div>
+<div class="flex items-center gap-lg">
+<div class="hidden lg:flex gap-md text-on-surface-variant">
+<span class="hover:text-primary transition-none cursor-default">SYSTEM STATUS: ONLINE</span>
+<span class="hover:text-primary transition-none cursor-default">LATENCY: 12MS</span>
+<span class="hover:text-primary transition-none cursor-default">UPTIME: 99.9%</span>
+</div>
+<div class="flex items-center gap-sm">
+<div class="relative flex items-center border border-outline-variant px-sm h-8 bg-surface">
+<span class="material-symbols-outlined text-[16px] text-on-surface-variant mr-sm">search</span>
+<input class="bg-transparent border-none outline-none text-on-surface font-code-table text-code-table placeholder-on-surface-variant w-32 focus:w-48 transition-all p-0 focus:ring-0" placeholder="[ / ] SEARCH LOGS..." type="text"/>
+</div>
+<button class="p-xs text-on-surface-variant hover:text-primary transition-none">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-primary transition-none">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-xs text-on-surface-variant hover:text-primary transition-none md:hidden">
+<span class="material-symbols-outlined">menu</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Canvas -->
+<main class="flex-1 overflow-auto bg-surface p-md flex flex-col gap-md">
+<div class="flex justify-between items-end border-b border-outline-variant pb-xs">
+<div>
+<h1 class="font-headline-md text-headline-md text-primary">IMMUTABLE AUDIT LOG</h1>
+<p class="font-code-table text-code-table text-on-surface-variant mt-xs">APPEND-ONLY SYSTEM LEDGER // INTEGRITY VERIFIED</p>
+</div>
+<div class="flex gap-sm">
+<button class="border border-outline-variant bg-surface text-on-surface px-sm py-xs font-code-table text-code-table hover:bg-primary hover:text-on-primary transition-none">
+                        [ EXPORT .CSV ]
+                    </button>
+<button class="border border-outline-variant bg-surface text-on-surface px-sm py-xs font-code-table text-code-table hover:bg-primary hover:text-on-primary transition-none">
+                        [ VERIFY HASH ]
+                    </button>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="border border-outline-variant flex-1 flex flex-col bg-background overflow-hidden relative">
+<!-- Table Header -->
+<div class="grid grid-cols-12 gap-gutter bg-surface-variant border-b border-outline-variant p-sm font-label-caps text-label-caps text-on-primary font-bold sticky top-0">
+<div class="col-span-2">TIMESTAMP</div>
+<div class="col-span-2">ACTION</div>
+<div class="col-span-2">ACTOR</div>
+<div class="col-span-2">TARGET</div>
+<div class="col-span-1">RESULT</div>
+<div class="col-span-3">SHA-256 HASH</div>
+</div>
+<!-- Table Body -->
+<div class="flex-1 overflow-y-auto font-code-table text-code-table pb-xl" id="log-container">
+<!-- Log entries will be inserted here. Using static sample for structural demonstration -->
+<div class="grid grid-cols-12 gap-gutter p-sm border-b border-outline-variant hover:bg-surface-container-high transition-none">
+<div class="col-span-2 text-on-surface-variant">2023-10-27T08:14:02Z</div>
+<div class="col-span-2 text-primary">AUTH_SUCCESS</div>
+<div class="col-span-2 text-on-surface">SYS_ADMIN_01</div>
+<div class="col-span-2 text-on-surface-variant">NODE_GATEWAY</div>
+<div class="col-span-1 text-[#00FF00]">[ OK ]</div>
+<div class="col-span-3 text-on-surface-variant truncate font-mono text-[10px]">e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855</div>
+</div>
+<div class="grid grid-cols-12 gap-gutter p-sm border-b border-outline-variant hover:bg-surface-container-high transition-none bg-surface-container-low">
+<div class="col-span-2 text-on-surface-variant">2023-10-27T08:14:15Z</div>
+<div class="col-span-2 text-primary">DATA_QUERY</div>
+<div class="col-span-2 text-on-surface">SYS_ADMIN_01</div>
+<div class="col-span-2 text-on-surface-variant">TABLE_USERS</div>
+<div class="col-span-1 text-[#00FF00]">[ OK ]</div>
+<div class="col-span-3 text-on-surface-variant truncate font-mono text-[10px]">8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92</div>
+</div>
+<div class="grid grid-cols-12 gap-gutter p-sm border-b border-outline-variant hover:bg-surface-container-high transition-none">
+<div class="col-span-2 text-on-surface-variant">2023-10-27T08:15:42Z</div>
+<div class="col-span-2 text-error">AUTH_FAILURE</div>
+<div class="col-span-2 text-on-surface">UNKNOWN_IP</div>
+<div class="col-span-2 text-on-surface-variant">NODE_GATEWAY</div>
+<div class="col-span-1 text-error">[ FAIL ]</div>
+<div class="col-span-3 text-on-surface-variant truncate font-mono text-[10px]">c3ab8ff13720e8ad9047dd39466b3c8974e592c2fa383d4a3960714caef0c4f2</div>
+</div>
+<div class="grid grid-cols-12 gap-gutter p-sm border-b border-outline-variant hover:bg-surface-container-high transition-none bg-error-container text-on-error-container">
+<div class="col-span-2">2023-10-27T08:15:45Z</div>
+<div class="col-span-2">[!! ALERT !!]</div>
+<div class="col-span-2">SYSTEM_MONITOR</div>
+<div class="col-span-2">SECURITY_POLICY</div>
+<div class="col-span-1">[ BLOCK ]</div>
+<div class="col-span-3 truncate font-mono text-[10px]">f2ca1bb6c7e907d06dafe4687e579fce76b37e4e93b7605022da52e6ccc26fd2</div>
+</div>
+<!-- Simulating many rows -->
+<script>
+                        const container = document.getElementById('log-container');
+                        const actions = ['FILE_ACCESS', 'CONF_CHANGE', 'SERVICE_START', 'NET_CON', 'PROCESS_EXEC'];
+                        const actors = ['DAEMON_SYS', 'OPERATOR_9', 'CRON_JOB', 'API_USER_112'];
+                        const targets = ['/etc/passwd', 'nginx.conf', 'docker.sock', '192.168.1.100:443', 'bash'];
+                        
+                        function generateHash() {
+                            return Array.from({length: 64}, () => Math.floor(Math.random() * 16).toString(16)).join('');
+                        }
+
+                        let time = new Date('2023-10-27T08:16:00Z');
+                        
+                        for(let i=0; i<30; i++) {
+                            time.setSeconds(time.getSeconds() + Math.floor(Math.random() * 60));
+                            const action = actions[Math.floor(Math.random() * actions.length)];
+                            const actor = actors[Math.floor(Math.random() * actors.length)];
+                            const target = targets[Math.floor(Math.random() * targets.length)];
+                            const isError = Math.random() > 0.9;
+                            const result = isError ? '[ FAIL ]' : '[ OK ]';
+                            const resultClass = isError ? 'text-error' : 'text-[#00FF00]';
+                            const bgClass = i % 2 === 0 ? 'bg-surface-container-low' : '';
+
+                            const row = document.createElement('div');
+                            row.className = `grid grid-cols-12 gap-gutter p-sm border-b border-outline-variant hover:bg-surface-container-high transition-none ${bgClass}`;
+                            row.innerHTML = `
+                                <div class="col-span-2 text-on-surface-variant">${time.toISOString().replace(/\.\d{3}Z$/, 'Z')}</div>
+                                <div class="col-span-2 text-primary">${action}</div>
+                                <div class="col-span-2 text-on-surface">${actor}</div>
+                                <div class="col-span-2 text-on-surface-variant truncate">${target}</div>
+                                <div class="col-span-1 ${resultClass}">${result}</div>
+                                <div class="col-span-3 text-on-surface-variant truncate font-mono text-[10px]">${generateHash()}</div>
+                            `;
+                            container.appendChild(row);
+                        }
+                    </script>
+<div class="p-sm text-center text-on-surface-variant border-b border-outline-variant animate-pulse">
+                        _AWAITING_NEW_ENTRIES_
+                    </div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

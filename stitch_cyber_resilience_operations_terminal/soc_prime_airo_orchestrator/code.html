@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AIRO - Autonomous Incident Response Orchestrator</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-variant": "#353434",
+                        "on-tertiary": "#342f2d",
+                        "surface-tint": "#c6c6c6",
+                        "inverse-surface": "#e5e2e1",
+                        "secondary-container": "#474747",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "surface-dim": "#141313",
+                        "inverse-primary": "#5d5f5f",
+                        "on-primary-fixed-variant": "#454747",
+                        "secondary-fixed": "#e4e2e1",
+                        "surface-container-high": "#2a2a2a",
+                        "inverse-on-surface": "#313030",
+                        "on-tertiary-fixed-variant": "#4b4643",
+                        "on-surface-variant": "#c4c7c8",
+                        "surface-container-low": "#1c1b1b",
+                        "on-error": "#690005",
+                        "on-background": "#e5e2e1",
+                        "surface-container-lowest": "#0e0e0e",
+                        "outline": "#8e9192",
+                        "tertiary-fixed-dim": "#cdc5c1",
+                        "on-tertiary-container": "#67615e",
+                        "primary-fixed": "#e2e2e2",
+                        "background": "#141313",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-secondary": "#303030",
+                        "on-secondary-container": "#b6b5b4",
+                        "secondary": "#c8c6c6",
+                        "outline-variant": "#444748",
+                        "surface-container-highest": "#353434",
+                        "on-primary-container": "#626363",
+                        "tertiary": "#fffbff",
+                        "on-primary": "#2f3131",
+                        "surface": "#141313",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "primary": "#fdfdfc",
+                        "on-primary-fixed": "#1a1c1c",
+                        "tertiary-fixed": "#eae1dd",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#1f1b19",
+                        "error-container": "#93000a",
+                        "primary-container": "#e0e0e0",
+                        "on-surface": "#e5e2e1",
+                        "surface-bright": "#3a3939",
+                        "tertiary-container": "#e7deda",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#201f1f",
+                        "on-secondary-fixed-variant": "#474747"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0",
+                        lg: "0",
+                        xl: "0",
+                        full: "0"
+                    },
+                    spacing: {
+                        md: "16px",
+                        lg: "24px",
+                        sm: "8px",
+                        xs: "4px",
+                        margin: "16px",
+                        xl: "32px",
+                        unit: "4px",
+                        gutter: "1px"
+                    },
+                    fontFamily: {
+                        "body-lg": ["JetBrains Mono"],
+                        "body-sm": ["JetBrains Mono"],
+                        "code-table": ["JetBrains Mono"],
+                        "headline-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "display-lg": ["JetBrains Mono"],
+                        "headline-md": ["JetBrains Mono"]
+                    },
+                    fontSize: {
+                        "body-lg": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "body-sm": ["12px", { lineHeight: "16px", fontWeight: "400" }],
+                        "code-table": ["11px", { lineHeight: "14px", fontWeight: "400" }],
+                        "headline-sm": ["18px", { lineHeight: "24px", fontWeight: "600" }],
+                        "label-caps": ["10px", { lineHeight: "12px", fontWeight: "700" }],
+                        "display-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }]
+                    }
+                }
+            }
+        };
+    </script>
+<style>
+        /* Utilitarian Brutalism Overrides */
+        * { border-radius: 0 !important; }
+        .brutal-border { border: 1px solid #333333; }
+        .brutal-border-b { border-bottom: 1px solid #333333; }
+        .brutal-border-r { border-right: 1px solid #333333; }
+        .brutal-border-t { border-top: 1px solid #333333; }
+        .brutal-border-l { border-left: 1px solid #333333; }
+        .brutal-border-thick { border: 2px solid #333333; }
+        
+        /* Focus state for brutalism */
+        .brutal-focus:focus-within { border: 1px solid #e0e0e0; }
+        
+        /* Custom Scrollbar for terminal feel */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #141313; border-left: 1px solid #333333; }
+        ::-webkit-scrollbar-thumb { background: #333333; }
+        ::-webkit-scrollbar-thumb:hover { background: #e0e0e0; }
+
+        /* Blink animation for terminal cursor */
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .cursor-blink { animation: blink 1s step-end infinite; }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-lg flex h-screen overflow-hidden antialiased">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-64 bg-background dark:bg-background flex flex-col border-r border-outline-variant z-20 hidden md:flex">
+<!-- Header -->
+<div class="p-md brutal-border-b bg-surface-container-low flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-container-highest brutal-border flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-on-surface">person</span>
+</div>
+<div>
+<div class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary tracking-tighter">SOC-PRIME</div>
+<div class="font-code-table text-code-table text-on-surface-variant">NODE-01.SYSTEM.RESILIENCE</div>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<ul class="flex-1 overflow-y-auto py-sm">
+<!-- BADE -->
+<li class="px-md py-sm">
+<a class="flex items-center gap-sm font-code-table text-code-table text-on-surface hover:bg-surface-container-high transition-none p-sm brutal-border border-transparent hover:border-outline-variant" href="#">
+<span class="material-symbols-outlined">security</span>
+                    BADE
+                </a>
+</li>
+<!-- AAPA -->
+<li class="px-md py-sm">
+<a class="flex items-center gap-sm font-code-table text-code-table text-on-surface hover:bg-surface-container-high transition-none p-sm brutal-border border-transparent hover:border-outline-variant" href="#">
+<span class="material-symbols-outlined">shield</span>
+                    AAPA
+                </a>
+</li>
+<!-- AIRO (Active) -->
+<li class="px-md py-sm">
+<a class="flex items-center gap-sm font-code-table text-code-table bg-primary text-on-primary font-bold border-y border-outline p-sm" href="#">
+<span class="material-symbols-outlined">memory</span>
+                    AIRO
+                </a>
+</li>
+<!-- VPA -->
+<li class="px-md py-sm">
+<a class="flex items-center gap-sm font-code-table text-code-table text-on-surface hover:bg-surface-container-high transition-none p-sm brutal-border border-transparent hover:border-outline-variant" href="#">
+<span class="material-symbols-outlined">visibility</span>
+                    VPA
+                </a>
+</li>
+<!-- CRDT -->
+<li class="px-md py-sm">
+<a class="flex items-center gap-sm font-code-table text-code-table text-on-surface hover:bg-surface-container-high transition-none p-sm brutal-border border-transparent hover:border-outline-variant" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                    CRDT
+                </a>
+</li>
+<!-- AUDIT LOG -->
+<li class="px-md py-sm">
+<a class="flex items-center gap-sm font-code-table text-code-table text-on-surface hover:bg-surface-container-high transition-none p-sm brutal-border border-transparent hover:border-outline-variant" href="#">
+<span class="material-symbols-outlined">terminal</span>
+                    AUDIT LOG
+                </a>
+</li>
+</ul>
+<!-- CTA -->
+<div class="p-md brutal-border-t bg-surface-container-lowest">
+<button class="w-full font-code-table text-code-table p-sm bg-background text-on-surface brutal-border hover:bg-primary hover:text-on-primary transition-none">
+                [ SYSTEM REBOOT ]
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="flex-1 flex flex-col md:ml-64 relative min-w-0 h-screen">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-12 px-md border-b border-outline-variant w-full bg-background dark:bg-background z-10 shrink-0">
+<div class="flex items-center gap-md">
+<div class="font-label-caps text-label-caps font-bold text-primary dark:text-primary md:hidden">SOC-PRIME // RESILIENCE PLATFORM</div>
+<div class="font-label-caps text-label-caps font-bold text-primary dark:text-primary hidden md:block">SOC-PRIME // RESILIENCE PLATFORM</div>
+</div>
+<div class="flex items-center gap-lg">
+<div class="hidden lg:flex items-center gap-md font-code-table text-code-table text-on-surface-variant">
+<span class="text-primary underline underline-offset-4 decoration-primary">SYSTEM STATUS: ONLINE</span>
+<span>LATENCY: 12MS</span>
+<span>UPTIME: 99.9%</span>
+</div>
+<div class="flex items-center gap-sm text-on-surface-variant">
+<button class="hover:text-primary transition-none flex items-center justify-center w-8 h-8 brutal-border border-transparent hover:border-outline-variant">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-primary transition-none flex items-center justify-center w-8 h-8 brutal-border border-transparent hover:border-outline-variant">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="hover:text-primary transition-none flex items-center justify-center w-8 h-8 brutal-border border-transparent hover:border-outline-variant">
+<span class="material-symbols-outlined">terminal</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Canvas Area (Split View) -->
+<main class="flex-1 flex flex-col lg:flex-row overflow-hidden bg-background">
+<!-- LEFT: Active Incidents Queue -->
+<section class="flex-1 flex flex-col brutal-border-r h-full overflow-hidden min-w-[320px]">
+<!-- Header -->
+<div class="p-sm brutal-border-b bg-surface-container-high flex justify-between items-center shrink-0">
+<h2 class="font-label-caps text-label-caps text-primary tracking-widest">ACTIVE_INCIDENTS_QUEUE</h2>
+<span class="font-code-table text-code-table text-on-surface-variant">[ 3 ITEMS ]</span>
+</div>
+<!-- Search/Filter -->
+<div class="p-sm brutal-border-b bg-surface-container-low shrink-0 flex gap-sm brutal-focus">
+<span class="font-code-table text-code-table text-on-surface-variant mt-1">[ / ]</span>
+<input class="w-full bg-transparent border-none text-on-surface font-code-table text-code-table focus:ring-0 placeholder:text-outline p-0" placeholder="FILTER QUEUE..." type="text"/>
+</div>
+<!-- Queue List -->
+<div class="flex-1 overflow-y-auto">
+<!-- Incident Item 1 (Active) -->
+<div class="p-md brutal-border-b bg-surface-container-high relative group cursor-pointer border-l-4 border-l-error">
+<div class="flex justify-between items-start mb-sm">
+<div class="font-code-table text-code-table text-error bg-error-container/20 px-xs py-0.5 border border-error-container">
+                                [!! CRITICAL !!]
+                            </div>
+<div class="font-code-table text-code-table text-on-surface-variant">T-0:02:14</div>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-primary mb-xs">Ransomware Lateral Movement</h3>
+<div class="font-code-table text-code-table text-on-surface-variant mb-md">
+                            HOST: <span class="text-on-surface">SRV-DC-01</span> | IP: <span class="text-on-surface">192.168.1.10</span>
+</div>
+<div class="flex gap-sm">
+<span class="font-code-table text-code-table px-xs py-0.5 brutal-border text-on-surface-variant">[TAG:CRED_DUMP]</span>
+<span class="font-code-table text-code-table px-xs py-0.5 brutal-border text-on-surface-variant">[TAG:WMI_EXEC]</span>
+</div>
+</div>
+<!-- Incident Item 2 -->
+<div class="p-md brutal-border-b hover:bg-surface-container-low transition-none cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="font-code-table text-code-table text-[#FFA500] border border-[#FFA500]/50 px-xs py-0.5">
+                                [ HIGH ]
+                            </div>
+<div class="font-code-table text-code-table text-on-surface-variant">T-1:14:05</div>
+</div>
+<h3 class="font-body-lg text-body-lg text-on-surface mb-xs">Anomalous Data Exfiltration</h3>
+<div class="font-code-table text-code-table text-on-surface-variant mb-md">
+                            USER: <span class="text-on-surface">J.DOE</span> | DEST: <span class="text-on-surface">104.21.34.122</span>
+</div>
+<div class="flex gap-sm">
+<span class="font-code-table text-code-table px-xs py-0.5 brutal-border text-on-surface-variant">[TAG:MEGA_UP]</span>
+</div>
+</div>
+<!-- Incident Item 3 -->
+<div class="p-md brutal-border-b hover:bg-surface-container-low transition-none cursor-pointer">
+<div class="flex justify-between items-start mb-sm">
+<div class="font-code-table text-code-table text-primary border border-outline-variant px-xs py-0.5">
+                                [ MEDIUM ]
+                            </div>
+<div class="font-code-table text-code-table text-on-surface-variant">T-4:42:11</div>
+</div>
+<h3 class="font-body-lg text-body-lg text-on-surface mb-xs">Multiple Failed Authentications</h3>
+<div class="font-code-table text-code-table text-on-surface-variant mb-md">
+                            HOST: <span class="text-on-surface">VPN-GW-02</span> | SOURCE: <span class="text-on-surface">MULTIPLE</span>
+</div>
+<div class="flex gap-sm">
+<span class="font-code-table text-code-table px-xs py-0.5 brutal-border text-on-surface-variant">[TAG:BRUTE_FORCE]</span>
+</div>
+</div>
+</div>
+</section>
+<!-- RIGHT: Playbook Execution -->
+<section class="flex-[1.5] flex flex-col h-full overflow-hidden bg-surface-dim relative min-w-[400px]">
+<!-- Background pattern for technical feel -->
+<div class="absolute inset-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#333333 1px, transparent 1px); background-size: 16px 16px;"></div>
+<!-- Header -->
+<div class="p-sm brutal-border-b bg-surface-container-highest flex justify-between items-center shrink-0 z-10">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary text-sm">memory</span>
+<h2 class="font-label-caps text-label-caps text-primary tracking-widest">PLAYBOOK_EXECUTION: ISOLATE_ENDPOINT</h2>
+</div>
+<span class="font-code-table text-code-table text-[#00FF00] border border-[#00FF00]/30 px-xs py-0.5 bg-[#00FF00]/10">STATUS: RUNNING</span>
+</div>
+<!-- Playbook Steps Terminal -->
+<div class="flex-1 p-md overflow-y-auto font-code-table text-code-table z-10 space-y-md">
+<!-- Step 1 -->
+<div class="brutal-border bg-background p-sm">
+<div class="flex justify-between items-center mb-xs">
+<span class="text-on-surface-variant">&gt; INIT: GATHER_FORENSIC_DATA [SRV-DC-01]</span>
+<span class="text-on-surface-variant text-[10px]">04:12:01 UTC</span>
+</div>
+<div class="text-[#00FF00] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">check_box</span>
+                            [ SUCCESS ] MEMORY DUMP CAPTURED.
+                        </div>
+</div>
+<!-- Step 2 -->
+<div class="brutal-border bg-background p-sm">
+<div class="flex justify-between items-center mb-xs">
+<span class="text-on-surface-variant">&gt; EXEC: KILL_MALICIOUS_PROCESSES</span>
+<span class="text-on-surface-variant text-[10px]">04:12:05 UTC</span>
+</div>
+<div class="text-[#00FF00] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">check_box</span>
+                            [ SUCCESS ] PID 4124, 8912 TERMINATED.
+                        </div>
+</div>
+<!-- Step 3 -->
+<div class="brutal-border bg-background p-sm">
+<div class="flex justify-between items-center mb-xs">
+<span class="text-on-surface-variant">&gt; EXEC: REVOKE_USER_TOKENS</span>
+<span class="text-on-surface-variant text-[10px]">04:12:08 UTC</span>
+</div>
+<div class="text-[#00FF00] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px]">check_box</span>
+                            [ SUCCESS ] ACTIVE SESSIONS INVALIDATED.
+                        </div>
+</div>
+<!-- Step 4 (Current/Pending) -->
+<div class="brutal-border border-outline bg-surface-container-high p-sm">
+<div class="flex justify-between items-center mb-xs">
+<span class="text-primary font-bold">&gt; REQ: NETWORK_ISOLATION_FW_RULE</span>
+<span class="text-on-surface-variant text-[10px]">04:12:15 UTC</span>
+</div>
+<div class="text-[#FFA500] flex items-center gap-xs">
+<span class="material-symbols-outlined text-[14px] animate-pulse">hourglass_empty</span>
+                            [ PENDING ] AWAITING HUMAN AUTHORIZATION...<span class="cursor-blink bg-primary w-2 h-[14px] inline-block ml-1 align-middle"></span>
+</div>
+</div>
+</div>
+<!-- Human-in-the-loop Approval Gate -->
+<div class="shrink-0 p-lg brutal-border-t brutal-border-thick border-error bg-error-container/10 relative z-10 m-md">
+<div class="absolute -top-3 left-4 bg-background px-xs font-label-caps text-label-caps text-error border border-error">
+                        APPROVAL GATE: HIGH RISK ACTION
+                    </div>
+<div class="mb-md">
+<h3 class="font-headline-sm text-headline-sm text-error mb-xs flex items-center gap-sm">
+<span class="material-symbols-outlined">warning</span>
+                            ISOLATE ENDPOINT (TIER 1 DOMAIN CONTROLLER)
+                        </h3>
+<p class="font-code-table text-code-table text-on-surface max-w-2xl">
+                            WARNING: Executing this action will sever network connectivity for SRV-DC-01. This may cause authentication failures across the local segment. Autonomous execution halted due to policy [CRIT-INFRA-01].
+                        </p>
+</div>
+<div class="flex gap-md">
+<button class="flex-1 bg-[#00FF00]/10 text-[#00FF00] brutal-border border-[#00FF00] p-md font-label-caps text-label-caps tracking-widest hover:bg-[#00FF00] hover:text-black transition-none flex justify-center items-center gap-sm">
+<span class="material-symbols-outlined text-sm">check</span>
+                            [ APPROVE ]
+                        </button>
+<button class="flex-1 bg-error/10 text-error brutal-border border-error p-md font-label-caps text-label-caps tracking-widest hover:bg-error hover:text-black transition-none flex justify-center items-center gap-sm">
+<span class="material-symbols-outlined text-sm">close</span>
+                            [ REJECT ]
+                        </button>
+</div>
+</div>
+</section>
+</main>
+</div>
+</body></html>

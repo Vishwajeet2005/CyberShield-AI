@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>SOC-PRIME - CRDT</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-variant": "#353434",
+                        "on-tertiary": "#342f2d",
+                        "surface-tint": "#c6c6c6",
+                        "inverse-surface": "#e5e2e1",
+                        "secondary-container": "#474747",
+                        "primary-fixed-dim": "#c6c6c6",
+                        "surface-dim": "#141313",
+                        "inverse-primary": "#5d5f5f",
+                        "on-primary-fixed-variant": "#454747",
+                        "secondary-fixed": "#e4e2e1",
+                        "surface-container-high": "#2a2a2a",
+                        "inverse-on-surface": "#313030",
+                        "on-tertiary-fixed-variant": "#4b4643",
+                        "on-surface-variant": "#c4c7c8",
+                        "surface-container-low": "#1c1b1b",
+                        "on-error": "#690005",
+                        "on-background": "#e5e2e1",
+                        "surface-container-lowest": "#0e0e0e",
+                        "outline": "#8e9192",
+                        "tertiary-fixed-dim": "#cdc5c1",
+                        "on-tertiary-container": "#67615e",
+                        "primary-fixed": "#e2e2e2",
+                        "background": "#141313",
+                        "on-secondary-fixed": "#1b1c1c",
+                        "on-secondary": "#303030",
+                        "on-secondary-container": "#b6b5b4",
+                        "secondary": "#c8c6c6",
+                        "outline-variant": "#444748",
+                        "surface-container-highest": "#353434",
+                        "on-primary-container": "#626363",
+                        "tertiary": "#fffbff",
+                        "on-primary": "#2f3131",
+                        "surface": "#141313",
+                        "secondary-fixed-dim": "#c8c6c6",
+                        "primary": "#fdfdfc",
+                        "on-primary-fixed": "#1a1c1c",
+                        "tertiary-fixed": "#eae1dd",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#1f1b19",
+                        "error-container": "#93000a",
+                        "primary-container": "#e0e0e0",
+                        "on-surface": "#e5e2e1",
+                        "surface-bright": "#3a3939",
+                        "tertiary-container": "#e7deda",
+                        "on-error-container": "#ffdad6",
+                        "surface-container": "#201f1f",
+                        "on-secondary-fixed-variant": "#474747"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "lg": "24px",
+                        "sm": "8px",
+                        "xs": "4px",
+                        "margin": "16px",
+                        "xl": "32px",
+                        "unit": "4px",
+                        "gutter": "1px"
+                    },
+                    "fontFamily": {
+                        "body-lg": ["JetBrains Mono"],
+                        "body-sm": ["JetBrains Mono"],
+                        "code-table": ["JetBrains Mono"],
+                        "headline-sm": ["JetBrains Mono"],
+                        "label-caps": ["JetBrains Mono"],
+                        "display-lg": ["JetBrains Mono"],
+                        "headline-md": ["JetBrains Mono"]
+                    },
+                    "fontSize": {
+                        "body-lg": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-sm": ["12px", { "lineHeight": "16px", "fontWeight": "400" }],
+                        "code-table": ["11px", { "lineHeight": "14px", "fontWeight": "400" }],
+                        "headline-sm": ["18px", { "lineHeight": "24px", "fontWeight": "600" }],
+                        "label-caps": ["10px", { "lineHeight": "12px", "fontWeight": "700" }],
+                        "display-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #141313; color: #e5e2e1; margin: 0; padding: 0; height: 100vh; display: flex; overflow: hidden; }
+        .grid-bg {
+            background-image: linear-gradient(#333333 1px, transparent 1px), linear-gradient(90deg, #333333 1px, transparent 1px);
+            background-size: 32px 32px;
+            background-position: -1px -1px;
+        }
+        .brutal-border { border: 1px solid #333333; }
+        .brutal-border-b { border-bottom: 1px solid #333333; }
+        .brutal-border-r { border-right: 1px solid #333333; }
+        .brutal-border-l { border-left: 1px solid #333333; }
+        .brutal-border-t { border-top: 1px solid #333333; }
+        .thick-border { border: 2px solid #333333; }
+        .thick-border-active { border: 2px solid #fdfdfc; }
+        .thick-border-error { border: 2px solid #ffb4ab; }
+        
+        /* Utility classes to match specific design requests */
+        .node-box { width: 64px; height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 10; background: #000; }
+        .connection-line-h { position: absolute; height: 1px; background: #333333; z-index: 5; }
+        .connection-line-v { position: absolute; width: 1px; background: #333333; z-index: 5; }
+        .path-error { background: #ffb4ab; }
+        
+        /* Blink animation for critical */
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        .animate-blink { animation: blink 1.5s infinite; }
+    </style>
+</head>
+<body class="font-body-lg text-body-lg bg-background text-on-surface">
+<!-- SideNavBar -->
+<nav class="fixed left-0 top-0 h-full w-64 bg-background dark:bg-background flex flex-col border-r border-outline-variant z-50">
+<!-- Header -->
+<div class="h-32 brutal-border-b flex flex-col justify-end p-md bg-surface-container-lowest">
+<div class="flex items-center gap-md mb-md">
+<div class="w-10 h-10 brutal-border bg-surface-container-high flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+</div>
+<div>
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary tracking-tighter uppercase">SOC-PRIME</h1>
+<p class="font-code-table text-code-table text-on-surface-variant">NODE-01.SYSTEM.RESILIENCE</p>
+</div>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<div class="flex-1 overflow-y-auto">
+<ul class="flex flex-col">
+<li class="h-12 flex items-center px-md text-on-surface hover:bg-surface-container-high transition-none cursor-pointer brutal-border-b">
+<span class="material-symbols-outlined mr-md">security</span>
+<span class="font-code-table text-code-table">BADE</span>
+</li>
+<li class="h-12 flex items-center px-md text-on-surface hover:bg-surface-container-high transition-none cursor-pointer brutal-border-b">
+<span class="material-symbols-outlined mr-md">shield</span>
+<span class="font-code-table text-code-table">AAPA</span>
+</li>
+<li class="h-12 flex items-center px-md text-on-surface hover:bg-surface-container-high transition-none cursor-pointer brutal-border-b">
+<span class="material-symbols-outlined mr-md">memory</span>
+<span class="font-code-table text-code-table">AIRO</span>
+</li>
+<li class="h-12 flex items-center px-md text-on-surface hover:bg-surface-container-high transition-none cursor-pointer brutal-border-b">
+<span class="material-symbols-outlined mr-md">visibility</span>
+<span class="font-code-table text-code-table">VPA</span>
+</li>
+<li class="h-12 flex items-center px-md bg-primary text-on-primary font-bold border-y border-outline transition-none cursor-pointer">
+<span class="material-symbols-outlined mr-md" style="font-variation-settings: 'FILL' 1;">analytics</span>
+<span class="font-code-table text-code-table">CRDT</span>
+</li>
+<li class="h-12 flex items-center px-md text-on-surface hover:bg-surface-container-high transition-none cursor-pointer brutal-border-b">
+<span class="material-symbols-outlined mr-md">terminal</span>
+<span class="font-code-table text-code-table">AUDIT LOG</span>
+</li>
+</ul>
+</div>
+<!-- CTA -->
+<div class="p-md brutal-border-t bg-surface-container-lowest">
+<button class="w-full h-10 bg-black brutal-border text-primary hover:bg-primary hover:text-black font-code-table text-code-table flex items-center justify-center transition-none">
+                [ SYSTEM REBOOT ]
+            </button>
+</div>
+</nav>
+<!-- Main Content Area -->
+<div class="ml-64 flex-1 flex flex-col h-full w-full bg-surface-dim relative">
+<!-- TopAppBar -->
+<header class="flex justify-between items-center h-12 px-md border-b border-outline-variant w-full bg-background dark:bg-background z-40 shrink-0">
+<div class="font-label-caps text-label-caps font-bold text-primary dark:text-primary tracking-widest">
+                SOC-PRIME // RESILIENCE PLATFORM
+            </div>
+<div class="flex items-center gap-lg">
+<div class="flex gap-md font-code-table text-code-table text-on-surface-variant hidden md:flex">
+<span class="text-primary underline underline-offset-4">SYSTEM STATUS: ONLINE</span>
+<span>LATENCY: 12MS</span>
+<span>UPTIME: 99.9%</span>
+</div>
+<div class="flex gap-md text-on-surface-variant">
+<button class="hover:text-primary transition-none flex items-center justify-center"><span class="material-symbols-outlined text-sm">notifications</span></button>
+<button class="hover:text-primary transition-none flex items-center justify-center"><span class="material-symbols-outlined text-sm">settings</span></button>
+<button class="hover:text-primary transition-none flex items-center justify-center"><span class="material-symbols-outlined text-sm">terminal</span></button>
+</div>
+</div>
+</header>
+<!-- CRDT Canvas -->
+<main class="flex-1 relative overflow-hidden flex flex-col bg-surface-container-lowest grid-bg">
+<!-- Canvas Header -->
+<div class="h-10 brutal-border-b flex items-center px-md justify-between bg-black z-20">
+<div class="font-code-table text-code-table text-on-surface font-bold">
+                    [ VIEW: DIGITAL TWIN TOPOLOGY ]
+                </div>
+<div class="flex gap-sm">
+<button class="px-sm py-xs text-code-table font-code-table bg-black brutal-border hover:bg-primary hover:text-black transition-none">[ ZOOM IN ]</button>
+<button class="px-sm py-xs text-code-table font-code-table bg-black brutal-border hover:bg-primary hover:text-black transition-none">[ ZOOM OUT ]</button>
+<button class="px-sm py-xs text-code-table font-code-table bg-primary text-black font-bold brutal-border transition-none">[ REFRESH ]</button>
+</div>
+</div>
+<!-- Network Topology Matrix Area -->
+<div class="flex-1 relative overflow-auto p-xl flex items-center justify-center z-10">
+<div class="relative w-[800px] h-[600px] border border-[#333] bg-black bg-opacity-50">
+<!-- Lines (Hardcoded for this specific matrix) -->
+<!-- INET to FW -->
+<div class="connection-line-h" style="top: 150px; left: 100px; width: 100px;"></div>
+<!-- FW to Proxy -->
+<div class="connection-line-h" style="top: 150px; left: 264px; width: 100px;"></div>
+<!-- Proxy to DMZ Switch -->
+<div class="connection-line-h" style="top: 150px; left: 428px; width: 100px;"></div>
+<!-- DMZ Switch down -->
+<div class="connection-line-v path-error" style="top: 150px; left: 560px; height: 100px;"></div>
+<!-- DMZ Web1 -->
+<div class="connection-line-h path-error" style="top: 250px; left: 560px; width: 100px;"></div>
+<!-- DMZ Web1 down -->
+<div class="connection-line-v path-error" style="top: 282px; left: 692px; height: 100px;"></div>
+<!-- DMZ Web1 to Internal FW -->
+<div class="connection-line-h path-error" style="top: 382px; left: 560px; width: 132px;"></div>
+<!-- Internal FW to Core Switch -->
+<div class="connection-line-h path-error" style="top: 382px; left: 428px; width: 68px;"></div>
+<!-- Core Switch to DB -->
+<div class="connection-line-v path-error" style="top: 382px; left: 396px; height: 100px;"></div>
+<div class="connection-line-h path-error" style="top: 482px; left: 396px; width: 100px;"></div>
+<!-- Workstations -->
+<div class="connection-line-h" style="top: 382px; left: 150px; width: 214px;"></div>
+<div class="connection-line-v" style="top: 250px; left: 150px; height: 132px;"></div>
+<!-- Nodes -->
+<!-- Row 1 -->
+<div class="absolute node-box thick-border" style="top: 118px; left: 36px;">
+<span class="material-symbols-outlined text-surface-tint mb-xs">public</span>
+<span class="font-label-caps text-label-caps text-surface-tint">INET</span>
+</div>
+<div class="absolute node-box thick-border" style="top: 118px; left: 200px;">
+<span class="material-symbols-outlined text-on-surface mb-xs">router</span>
+<span class="font-label-caps text-label-caps text-on-surface">EDGE-FW</span>
+</div>
+<div class="absolute node-box thick-border" style="top: 118px; left: 364px;">
+<span class="material-symbols-outlined text-on-surface mb-xs">vpn_lock</span>
+<span class="font-label-caps text-label-caps text-on-surface">PROXY</span>
+</div>
+<div class="absolute node-box thick-border" style="top: 118px; left: 528px;">
+<span class="material-symbols-outlined text-on-surface mb-xs">hub</span>
+<span class="font-label-caps text-label-caps text-on-surface">DMZ-SW</span>
+</div>
+<!-- Row 2 -->
+<div class="absolute node-box thick-border" style="top: 218px; left: 118px;">
+<span class="material-symbols-outlined text-on-surface mb-xs">desktop_windows</span>
+<span class="font-label-caps text-label-caps text-on-surface">WS-01</span>
+</div>
+<div class="absolute node-box thick-border" style="top: 218px; left: 218px;">
+<span class="material-symbols-outlined text-on-surface mb-xs">desktop_windows</span>
+<span class="font-label-caps text-label-caps text-on-surface">WS-02</span>
+</div>
+<div class="absolute node-box thick-border-error animate-blink bg-error-container bg-opacity-20" style="top: 218px; left: 660px;">
+<span class="material-symbols-outlined text-error mb-xs">dns</span>
+<span class="font-label-caps text-label-caps text-error">WEB-DMZ</span>
+<div class="absolute -top-6 -right-6 px-1 bg-error text-black font-label-caps text-[8px] font-bold">COMPROMISED</div>
+</div>
+<!-- Row 3 -->
+<div class="absolute node-box thick-border" style="top: 350px; left: 496px;">
+<span class="material-symbols-outlined text-on-surface mb-xs">router</span>
+<span class="font-label-caps text-label-caps text-on-surface">INT-FW</span>
+</div>
+<div class="absolute node-box thick-border" style="top: 350px; left: 364px;">
+<span class="material-symbols-outlined text-on-surface mb-xs">hub</span>
+<span class="font-label-caps text-label-caps text-on-surface">CORE-SW</span>
+</div>
+<!-- Row 4 -->
+<div class="absolute node-box thick-border-error bg-error-container bg-opacity-20" style="top: 450px; left: 496px;">
+<span class="material-symbols-outlined text-error mb-xs">database</span>
+<span class="font-label-caps text-label-caps text-error">DB-MAIN</span>
+<div class="absolute -top-6 -right-6 px-1 bg-error text-black font-label-caps text-[8px] font-bold">TARGET</div>
+</div>
+</div>
+</div>
+<!-- Side Panel: Attack Path (Overlay) -->
+<div class="absolute right-0 top-10 bottom-0 w-80 bg-black brutal-border-l z-30 flex flex-col">
+<div class="h-10 brutal-border-b bg-surface-container-high flex items-center px-md">
+<span class="font-code-table text-code-table font-bold text-error">[!! THREAT DETECTED !!]</span>
+</div>
+<div class="p-md flex-1 overflow-y-auto">
+<div class="mb-md">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">ACTIVE ATTACK PATH</div>
+<div class="p-sm bg-surface-container-low brutal-border">
+<ul class="font-code-table text-code-table text-on-surface space-y-2">
+<li class="flex items-center">
+<span class="w-4 h-4 bg-surface-variant brutal-border inline-block mr-sm"></span>
+<span>INTERNET (SRC: 192.168.1.x)</span>
+</li>
+<li class="flex items-center pl-2">
+<span class="material-symbols-outlined text-sm mr-1">arrow_downward</span>
+</li>
+<li class="flex items-center">
+<span class="w-4 h-4 bg-error text-black flex items-center justify-center inline-block mr-sm font-bold text-[10px]">X</span>
+<span class="text-error font-bold">DMZ-WEB-01 (EXPLOIT)</span>
+</li>
+<li class="flex items-center pl-2">
+<span class="material-symbols-outlined text-sm mr-1 text-error">arrow_downward</span>
+</li>
+<li class="flex items-center">
+<span class="w-4 h-4 bg-error-container brutal-border border-error inline-block mr-sm"></span>
+<span class="text-error">INTERNAL-DB (PIVOT)</span>
+</li>
+</ul>
+</div>
+</div>
+<div class="mb-md">
+<div class="font-label-caps text-label-caps text-on-surface-variant mb-xs">CHOKEPOINT ANALYSIS</div>
+<div class="p-sm bg-surface-container-low brutal-border font-code-table text-code-table">
+<div class="flex justify-between mb-1">
+<span>NODE: DMZ-WEB-01</span>
+<span class="text-error">98% SEVERITY</span>
+</div>
+<div class="w-full h-2 bg-surface-variant mb-2">
+<div class="h-full bg-error" style="width: 98%;"></div>
+</div>
+<div class="text-on-surface-variant mt-2">
+                                Lateral movement detected from DMZ segment to internal subnet bypassing INT-FW ruleset 402.
+                            </div>
+</div>
+</div>
+</div>
+<div class="p-md brutal-border-t">
+<button class="w-full h-8 bg-error text-black brutal-border hover:bg-white hover:text-black font-code-table text-code-table font-bold transition-none mb-sm">
+                        [ ISOLATE DMZ-WEB-01 ]
+                    </button>
+<button class="w-full h-8 bg-black text-on-surface brutal-border hover:bg-surface-variant font-code-table text-code-table transition-none">
+                        [ BLOCK INT-FW PORT 1433 ]
+                    </button>
+</div>
+</div>
+</main>
+</div>
+</body></html>
