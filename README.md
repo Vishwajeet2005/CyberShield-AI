@@ -246,7 +246,7 @@ Observed TTPs (from BADE alerts)
 - **Full MITRE ATT&CK v14+ knowledge graph** in Neo4j (Enterprise + ICS + Mobile, ~700 techniques)
 - **Cosine similarity matching** of observed TTP vector against 4 known India-targeting actor profiles
 - **Markov chain campaign modelling** for next-move prediction with probability scores
-- **RAG-powered threat intelligence Q&A** over CERT-In advisories + CTI report corpus (Claude/Mistral + Qdrant)
+- **RAG-powered threat intelligence Q&A** over CERT-In advisories + CTI report corpus (Groq/Mistral + Qdrant)
 - **India-specific threat actor focus**: APT41, Lazarus Group, SideWinder, Transparent Tribe
 
 #### Tracked Threat Actors
@@ -477,7 +477,7 @@ Attack Path = Sequence of nodes/edges an attacker traverses
 
 | Technology | Use |
 |-----------|-----|
-| **Claude claude-sonnet-4-6** | Threat Q&A generation, incident report writing |
+| **Groq Llama 3 70B** | Threat Q&A generation, incident report writing |
 | **Qdrant / Weaviate** | Vector store for CTI report corpus |
 | **LangChain** | RAG pipeline orchestration |
 
