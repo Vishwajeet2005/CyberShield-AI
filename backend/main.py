@@ -17,6 +17,12 @@ from services.vpa_service import load_feeds
 from services.crdt_service import build_digital_twin
 from routers import bade, aapa, airo, vpa, crdt, system
 
+# ── New stack imports (Neo4j, Kafka, ClickHouse, PyTorch) ──────────────────────
+from services import neo4j_service
+from kafka.pipeline import kafka_producer, ensure_topics
+from db.clickhouse_client import bootstrap_schema as ch_bootstrap, is_available as ch_available
+from ingestion.train_autoencoder import autoencoder_scorer
+
 logging.basicConfig(level=logging.INFO, format="%(levelname)s  %(name)s: %(message)s")
 logger = logging.getLogger("cybershield")
 
@@ -42,7 +48,37 @@ async def lifespan(app: FastAPI):
     logger.info("  [4/4] Building CRDT digital twin graph...")
     build_digital_twin()
 
-    logger.info("✅  All modules operational. API ready.")
+    logger.info("  [5/7] Connecting to Neo4j graph database...")
+    if neo4j_service.is_available():
+        neo4j_service.bootstrap_schema()
+        from data.topology import NODES, EDGES
+        neo4j_service.load_topology(NODES, EDGES)
+        logger.info("        Neo4j: topology loaded (%d nodes).", len(NODES))
+    else:
+        logger.warning("        Neo4j: unavailable — using NetworkX fallback.")
+
+    logger.info("  [6/7] Initialising Kafka event pipeline...")
+    await kafka_producer.start()
+    await ensure_topics()
+    if kafka_producer._available:
+        logger.info("        Kafka: producer ready on %s.", "localhost:9092")
+    else:
+        logger.warning("        Kafka: unavailable — using in-memory simulator.")
+
+    logger.info("  [7/7] Connecting to ClickHouse analytical database...")
+    ch_bootstrap()
+    if ch_available():
+        logger.info("        ClickHouse: schema ready — real MTTD/MTTR enabled.")
+    else:
+        logger.warning("        ClickHouse: unavailable — metrics will use cached values.")
+
+    logger.info("  [+] Loading PyTorch Autoencoder anomaly scorer...")
+    if autoencoder_scorer.load():
+        logger.info("        PyTorch Autoencoder: loaded — dual-model scoring active.")
+    else:
+        logger.warning("        PyTorch Autoencoder: model not found — run train_autoencoder.py to train it.")
+
+    logger.info("All modules operational. API ready.")
     yield
 
     # ── Shutdown ─────────────────────────────
