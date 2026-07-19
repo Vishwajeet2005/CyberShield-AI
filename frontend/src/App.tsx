@@ -85,7 +85,6 @@ export default function App() {
             ))}
           </ul>
         </div>
-        </div>
       </nav>
 
       {/* Main Content Area */}
