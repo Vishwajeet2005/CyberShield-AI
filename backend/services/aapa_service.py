@@ -1,7 +1,7 @@
 import os
 import json
 import chromadb
-from anthropic import Anthropic
+from groq import Groq
 from typing import Dict, Any, List
 from dotenv import load_dotenv
 
@@ -13,12 +13,12 @@ class AAPAService:
     """
     Advanced Attribution & Prediction Agent (AAPA)
     Phase 2 RAG Implementation: Uses Chroma DB for retrieving MITRE ATT&CK techniques
-    and Anthropic Claude API for reasoning and citation.
+    and Groq API for reasoning and citation.
     """
     def __init__(self):
         self._init_chroma()
-        self.api_key = os.environ.get("ANTHROPIC_API_KEY", "")
-        self.anthropic = Anthropic(api_key=self.api_key) if self.api_key else None
+        self.api_key = os.environ.get("GROQ_API_KEY", "")
+        self.llm_client = Groq(api_key=self.api_key) if self.api_key else None
 
     def _init_chroma(self):
         """Initialise local Chroma DB and load the curated MITRE ATT&CK corpus."""
@@ -53,13 +53,13 @@ class AAPAService:
         3. Pass to Claude for justification and next-stage prediction.
         """
         # Fallback state if API key is missing
-        if not self.anthropic:
+        if not self.llm_client:
             return {
                 "attributed_actor": "Unknown (Attribution Unavailable)",
                 "confidence": 0.0,
                 "current_ttps": [],
                 "predicted_next_ttps": [],
-                "justification": "Attribution unavailable: ANTHROPIC_API_KEY is not configured.",
+                "justification": "Attribution unavailable: GROQ_API_KEY is not configured.",
                 "status": "fallback"
             }
 
@@ -79,7 +79,7 @@ class AAPAService:
         
         context = "\n".join(retrieved_docs)
         
-        # 3. Claude Prompt Pipeline
+        # 3. LLM Prompt Pipeline
         prompt = f"""You are a senior cybersecurity analyst. Based on the following retrieved MITRE ATT&CK techniques and the anomalous entity profile, determine the most likely attribution, provide a cited justification, and predict the next stage technique.
         
 Retrieved ATT&CK Context:
@@ -98,18 +98,19 @@ Respond ONLY with a valid JSON object matching exactly this schema:
 }}"""
 
         try:
-            response = self.anthropic.messages.create(
-                model="claude-3-haiku-20240307",
+            response = self.llm_client.chat.completions.create(
+                model="llama3-70b-8192",
                 max_tokens=500,
                 temperature=0.2,
-                system="You are CyberShield AI Attribution Engine. Always output strictly valid JSON.",
+                response_format={"type": "json_object"},
                 messages=[
+                    {"role": "system", "content": "You are CyberShield AI Attribution Engine. Always output strictly valid JSON."},
                     {"role": "user", "content": prompt}
                 ]
             )
             
-            result_json = response.content[0].text
-            # Simple cleanup in case Claude adds markdown blocks
+            result_json = response.choices[0].message.content
+            # Simple cleanup in case LLM adds markdown blocks
             if "```json" in result_json:
                 result_json = result_json.split("```json")[1].split("```")[0].strip()
             elif "```" in result_json:
@@ -121,7 +122,7 @@ Respond ONLY with a valid JSON object matching exactly this schema:
             
         except Exception as e:
             # Fallback on failure
-            print(f"Claude API Error: {e}")
+            print(f"Groq API Error: {e}")
             return {
                 "attributed_actor": "Unknown (Attribution Unavailable)",
                 "confidence": 0.0,
