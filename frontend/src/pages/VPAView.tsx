@@ -12,12 +12,12 @@ interface CVEEntry {
   priority_rank: number
 }
 
-const API = 'http://localhost:8000'
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 export default function VPAView() {
   const [cves, setCves] = useState<CVEEntry[]>([])
   const [selected, setSelected] = useState<CVEEntry | null>(null)
-  const [refreshing, setRefreshing] = useState(false)
+
   const [filter, setFilter] = useState('')
 
   useEffect(() => {
@@ -27,18 +27,6 @@ export default function VPAView() {
       .catch(() => {})
   }, [])
 
-  const refresh = async () => {
-    setRefreshing(true)
-    try {
-      await fetch(`${API}/api/vpa/refresh`, { method: 'POST' })
-      const r = await fetch(`${API}/api/vpa/vulnerabilities`)
-      if (r.ok) {
-        const d = await r.json()
-        setCves(Array.isArray(d) ? d : d?.items ?? d?.vulnerabilities ?? [])
-      }
-    } catch { /* no-op */ }
-    setRefreshing(false)
-  }
 
   const filtered = cves.filter(c => c.cve_id.toLowerCase().includes(filter.toLowerCase()))
 
