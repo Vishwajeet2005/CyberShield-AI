@@ -9,10 +9,12 @@ import AuditLogView from './pages/AuditLogView'
 const API = 'http://localhost:8000'
 
 interface Metrics {
-  mttd?: string
-  mttr?: string
-  tpr?: string
-  fpr?: string
+  tpr?: string | number
+  fpr?: string | number
+  mttd_hours?: number
+  mttr_hours?: number
+  true_positive_rate?: number
+  false_positive_rate?: number
   alerts_today?: number
   containments?: number
 }
@@ -83,10 +85,6 @@ export default function App() {
             ))}
           </ul>
         </div>
-        <div className="p-md border-t border-outline-variant mt-auto">
-          <button className="w-full py-sm border border-outline-variant bg-surface text-on-surface hover:bg-primary hover:text-on-primary font-code-table text-code-table uppercase transition-none">
-            [ SYSTEM REBOOT ]
-          </button>
         </div>
       </nav>
 
@@ -102,10 +100,10 @@ export default function App() {
           </div>
           <div className="flex items-center gap-lg">
             <div className="flex items-center gap-md font-code-table text-code-table text-on-surface-variant">
-              <span className="hover:text-primary cursor-pointer" title="Mean Time To Detect">MTTD: {metrics.mttd ?? '--'}</span>
-              <span className="hover:text-primary cursor-pointer" title="Mean Time To Respond">MTTR: {metrics.mttr ?? '--'}</span>
-              <span className="hover:text-primary cursor-pointer" title="True Positive Rate">TPR: {metrics.tpr ?? '--'}</span>
-              <span className="hover:text-primary cursor-pointer text-error" title="False Positive Rate">FPR: {metrics.fpr ?? '--'}</span>
+              <span className="hover:text-primary cursor-pointer" title="Mean Time To Detect">MTTD: {metrics.mttd ?? (metrics.mttd_hours !== undefined ? `${metrics.mttd_hours.toFixed(1)}h` : '--')}</span>
+              <span className="hover:text-primary cursor-pointer" title="Mean Time To Respond">MTTR: {metrics.mttr ?? (metrics.mttr_hours !== undefined ? `${metrics.mttr_hours.toFixed(1)}h` : '--')}</span>
+              <span className="hover:text-primary cursor-pointer" title="True Positive Rate">TPR: {metrics.tpr ?? (metrics.true_positive_rate !== undefined ? `${(metrics.true_positive_rate * 100).toFixed(1)}%` : '--')}</span>
+              <span className="hover:text-primary cursor-pointer text-error" title="False Positive Rate">FPR: {metrics.fpr ?? (metrics.false_positive_rate !== undefined ? `${(metrics.false_positive_rate * 100).toFixed(1)}%` : '--')}</span>
             </div>
             <div className="flex items-center gap-sm text-on-surface-variant border-l border-outline-variant pl-md ml-sm h-12">
               <span className="font-code-table text-code-table mr-4">{clock}</span>
