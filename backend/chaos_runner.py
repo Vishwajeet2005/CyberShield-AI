@@ -84,7 +84,7 @@ else:
     print(" <- Failed to queue action.")
 
 # ─── 3. The RAG Prompt Injection ─────────────────────────────────────────────
-print("\n[TEST 3] RAG Prompt Injection (Claude JSON Bypass)")
+print("\n[TEST 3] RAG Prompt Injection (Groq JSON Bypass)")
 print(" -> Sending malicious prompt to override attribution schema...")
 
 injection_payload = {
