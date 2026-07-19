@@ -14,8 +14,8 @@ async def analyze(
 ):
     """
     RAG-powered Attribution Endpoint.
-    Uses Chroma DB for MITRE ATT&CK retrieval and Claude for reasoning.
-    Hard timeout: 10 seconds — prevents worker pool exhaustion from hanging Claude calls.
+    Uses Chroma DB for MITRE ATT&CK retrieval and Groq for reasoning.
+    Hard timeout: 10 seconds — prevents worker pool exhaustion from hanging Groq calls.
     """
     try:
         result = await asyncio.wait_for(
@@ -26,7 +26,7 @@ async def analyze(
     except asyncio.TimeoutError:
         raise HTTPException(
             status_code=504,
-            detail=f"Attribution timed out after {RAG_TIMEOUT_SECONDS}s. Claude API may be unreachable."
+            detail=f"Attribution timed out after {RAG_TIMEOUT_SECONDS}s. Groq API may be unreachable."
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
