@@ -118,7 +118,6 @@ multitasking==0.0.13
 nbformat==5.10.4
 neo4j==6.2.0
 networkx==3.6.1
--e git+https://github.com/Vishwajeet2005/Nexus--AI-NPC-backend.git@898956503a96539bf3fca7efcf9e7e773c45d42d#egg=nexus_py&subdirectory=sdk\python
 numpy==2.4.3
 oauthlib==3.3.1
 onnx-ir==0.2.1
