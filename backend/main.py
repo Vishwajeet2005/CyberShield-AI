@@ -6,8 +6,9 @@ CyberShield AI — FastAPI Application Entry Point
 from contextlib import asynccontextmanager
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 import config
 from database import init_db
@@ -62,6 +63,44 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# ─────────────────────────────────────────────
+# Security Middleware
+# ─────────────────────────────────────────────
+
+MAX_BODY_BYTES = 1 * 1024 * 1024  # 1 MB hard cap
+
+@app.middleware("http")
+async def body_guard(request: Request, call_next):
+    """
+    Rejects:
+      - Zero-byte bodies on POST/PUT/PATCH (the attack vector found in chaos testing)
+      - Bodies larger than 1 MB to prevent memory exhaustion
+    """
+    if request.method in ("POST", "PUT", "PATCH"):
+        content_length = request.headers.get("content-length")
+
+        # Block explicit Content-Length: 0 with a JSON content-type
+        if content_length is not None and int(content_length) == 0:
+            if "application/json" in request.headers.get("content-type", ""):
+                logger.warning("SECURITY: Zero-byte body rejected from %s %s",
+                               request.method, request.url.path)
+                return JSONResponse(
+                    status_code=400,
+                    content={"detail": "Request body must not be empty for this method."}
+                )
+
+        # Block oversized bodies
+        if content_length is not None and int(content_length) > MAX_BODY_BYTES:
+            logger.warning("SECURITY: Oversized body (%s bytes) rejected from %s %s",
+                           content_length, request.method, request.url.path)
+            return JSONResponse(
+                status_code=413,
+                content={"detail": f"Request body exceeds maximum allowed size of {MAX_BODY_BYTES // 1024}KB."}
+            )
+
+    return await call_next(request)
+
 
 # CORS — allow React dev server
 app.add_middleware(
