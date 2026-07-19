@@ -14,7 +14,9 @@ interface Alert {
 const API = 'http://localhost:8000'
 
 function tsRelative(ts: string) {
+  if (!ts) return 'UNKNOWN'
   const diff = Date.now() - new Date(ts).getTime()
+  if (Number.isNaN(diff)) return 'UNKNOWN'
   const s = Math.floor(diff / 1000)
   if (s < 60) return `${s}s ago`
   if (s < 3600) return `${Math.floor(s / 60)}m ago`
@@ -38,9 +40,12 @@ export default function BADEView() {
     return () => clearInterval(id)
   }, [])
 
-  const filtered = alerts.filter(a => a.entity_id.includes(filter) || a.entity_type.includes(filter))
-  const criticalCount = alerts.filter(a => a.anomaly_score >= 80).length
-  const warningCount = alerts.filter(a => a.anomaly_score >= 60 && a.anomaly_score < 80).length
+  const safeAlerts = Array.isArray(alerts) ? alerts : []
+  const filtered = safeAlerts.filter(a => 
+    (a.entity_id || '').includes(filter) || (a.entity_type || '').includes(filter)
+  )
+  const criticalCount = safeAlerts.filter(a => (a.anomaly_score || 0) >= 80).length
+  const warningCount = safeAlerts.filter(a => (a.anomaly_score || 0) >= 60 && (a.anomaly_score || 0) < 80).length
 
   return (
     <>
@@ -105,13 +110,13 @@ export default function BADEView() {
                       }`}
                     >
                       <td className={`p-sm font-bold ${isCrit ? 'text-error' : 'text-on-surface'}`}>
-                        {a.entity_id} {selected?.alert_id === a.alert_id && <span className="blink-cursor">_</span>}
+                        {a.entity_id || 'UNKNOWN'} {selected?.alert_id === a.alert_id && <span className="blink-cursor">_</span>}
                       </td>
-                      <td className="p-sm">{a.entity_type}</td>
+                      <td className="p-sm">{a.entity_type || 'UNKNOWN'}</td>
                       <td className={`p-sm ${isCrit ? 'text-error' : isHigh ? 'text-surface-tint' : ''}`}>
-                        {a.anomaly_score.toFixed(1)}
+                        {(a.anomaly_score || 0).toFixed(1)}
                       </td>
-                      <td className="p-sm">{tsRelative(a.timestamp)}</td>
+                      <td className="p-sm">{tsRelative(a.timestamp || '')}</td>
                       <td className="p-sm">
                         {isCrit ? (
                           <span className="bg-error text-on-error px-xs py-[2px]">[ CRITICAL ]</span>
