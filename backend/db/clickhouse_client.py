@@ -21,7 +21,7 @@ CLICKHOUSE_HOST = "localhost"
 CLICKHOUSE_PORT = 8123
 CLICKHOUSE_DB   = "cybershield"
 CLICKHOUSE_USER = "default"
-CLICKHOUSE_PASS = ""
+CLICKHOUSE_PASS = "cybershield123"
 
 # ─── Connection ───────────────────────────────────────────────────────────────
 
