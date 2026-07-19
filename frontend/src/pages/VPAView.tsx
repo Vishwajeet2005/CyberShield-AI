@@ -62,13 +62,6 @@ export default function VPAView() {
         </div>
         <div className="flex items-center gap-sm text-on-surface-variant">
           <span>{filtered.length} RECORDS</span>
-          <button 
-            onClick={refresh}
-            disabled={refreshing}
-            className="border border-outline-variant px-xs hover:bg-primary hover:text-on-primary"
-          >
-            {refreshing ? '[ REFRESHING... ]' : '[ REFRESH NVD ]'}
-          </button>
         </div>
       </div>
 
