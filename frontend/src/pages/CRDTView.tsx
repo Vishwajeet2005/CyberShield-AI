@@ -26,7 +26,6 @@ export default function CRDTView() {
   const svgRef = useRef<SVGSVGElement>(null)
 
   const [refreshing, setRefreshing] = useState(false)
-  const [msg, setMsg] = useState<string | null>(null)
 
   const fetchTopo = async () => {
     setRefreshing(true)
@@ -191,7 +190,6 @@ export default function CRDTView() {
           
           {selected && (
             <div className="p-md border-t border-outline-variant mt-auto space-y-xs">
-              {msg && <div className="text-primary font-code-table text-code-table mb-xs">{msg}</div>}
               <button
                 onClick={() => { window.dispatchEvent(new CustomEvent('navigate-view', { detail: 'bade' })) }}
                 className="w-full h-8 bg-black text-on-surface border border-outline-variant hover:bg-primary hover:text-black hover:border-primary font-code-table text-code-table transition-none"
