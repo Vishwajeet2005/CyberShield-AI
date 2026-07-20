@@ -106,9 +106,7 @@ export default function App() {
             </div>
             <div className="flex items-center gap-sm text-on-surface-variant border-l border-outline-variant pl-md ml-sm h-12">
               <span className="font-code-table text-code-table mr-4">{clock}</span>
-              <span className="material-symbols-outlined cursor-pointer hover:text-primary text-[18px]">notifications</span>
-              <span className="material-symbols-outlined cursor-pointer hover:text-primary text-[18px]">settings</span>
-              <span className="material-symbols-outlined cursor-pointer hover:text-primary text-[18px]">terminal</span>
+
             </div>
           </div>
         </header>
