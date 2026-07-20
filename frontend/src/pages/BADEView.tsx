@@ -31,6 +31,34 @@ export default function BADEView() {
   const [alerts, setAlerts] = useState<Alert[]>([])
   const [selected, setSelected] = useState<Alert | null>(null)
   const [filter, setFilter] = useState('')
+  const [actionMsg, setActionMsg] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  const showMsg = (msg: string) => {
+    setActionMsg(msg)
+    setTimeout(() => setActionMsg(null), 4000)
+  }
+
+  const handleIsolate = async () => {
+    if (!selected) return
+    setBusy(true)
+    try {
+      const r = await fetch(`${API}/api/airo/actions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ incident_id: selected.id, action_type: 'endpoint_isolate', target: selected.entity_id })
+      })
+      if (r.ok) showMsg(`✓ ISOLATION ORDER SENT FOR ${selected.entity_id}`)
+      else showMsg(`✗ ISOLATE FAILED — CHECK AIRO MODULE`)
+    } catch { showMsg('✗ BACKEND UNREACHABLE') }
+    setBusy(false)
+  }
+
+  const handleInvestigate = () => {
+    if (!selected) return
+    showMsg(`→ PIVOT: NAVIGATE TO AIRO FOR ${selected.entity_id}`)
+    window.location.hash = '#/airo'
+  }
 
   useEffect(() => {
     const poll = async () => {
@@ -68,6 +96,13 @@ export default function BADEView() {
           </div>
         </div>
       </div>
+
+      {/* Action toast notification */}
+      {actionMsg && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-surface-container-high border border-primary px-md py-sm font-code-table text-code-table text-primary shadow-lg">
+          {actionMsg}
+        </div>
+      )}
 
       <div className="grid grid-cols-12 gap-md flex-1 overflow-hidden">
         {/* Main Data Table Container */}
@@ -194,10 +229,17 @@ export default function BADEView() {
                     </ul>
                   </div>
                   <div className="mt-auto pt-sm flex gap-sm">
-                    <button className="flex-1 py-xs border border-error text-error hover:bg-error hover:text-on-error transition-none uppercase">
-                      [ ISOLATE HOST ]
+                    <button
+                      onClick={handleIsolate}
+                      disabled={busy}
+                      className="flex-1 py-xs border border-error text-error hover:bg-error hover:text-on-error transition-none uppercase disabled:opacity-50"
+                    >
+                      {busy ? '[ SENDING... ]' : '[ ISOLATE HOST ]'}
                     </button>
-                    <button className="flex-1 py-xs border border-outline-variant hover:bg-surface-tint hover:text-on-surface transition-none uppercase">
+                    <button
+                      onClick={handleInvestigate}
+                      className="flex-1 py-xs border border-outline-variant hover:bg-surface-tint hover:text-on-surface transition-none uppercase"
+                    >
                       [ INVESTIGATE ]
                     </button>
                   </div>

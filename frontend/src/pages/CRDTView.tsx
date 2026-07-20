@@ -25,12 +25,20 @@ export default function CRDTView() {
   const [selected, setSelected] = useState<TopoNode | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
 
-  useEffect(() => {
-    fetch(`${API}/api/crdt/topology`)
-      .then(r => r.json())
-      .then(d => { setNodes(d.nodes ?? []); setEdges(d.edges ?? []) })
-      .catch(() => {})
-  }, [])
+  const [refreshing, setRefreshing] = useState(false)
+  const [msg, setMsg] = useState<string | null>(null)
+
+  const fetchTopo = async () => {
+    setRefreshing(true)
+    try {
+      const d = await fetch(`${API}/api/crdt/topology`).then(r => r.json())
+      setNodes(d.nodes ?? [])
+      setEdges(d.edges ?? [])
+    } catch {}
+    setRefreshing(false)
+  }
+
+  useEffect(() => { fetchTopo() }, [])
 
   // Minimal force-free layout — group by department, stack vertically
   const departments = [...new Set(nodes.map(n => n.department))].filter(Boolean)
@@ -63,7 +71,13 @@ export default function CRDTView() {
           [ VIEW: DIGITAL TWIN TOPOLOGY ] ({nodes.length} NODES / {edges.length} EDGES)
         </div>
         <div className="flex gap-sm">
-          <button className="px-sm py-xs text-code-table font-code-table bg-black border border-outline-variant hover:bg-primary hover:text-black transition-none">[ REFRESH ]</button>
+          <button
+            onClick={fetchTopo}
+            disabled={refreshing}
+            className="px-sm py-xs text-code-table font-code-table bg-black border border-outline-variant hover:bg-primary hover:text-black transition-none disabled:opacity-50"
+          >
+            {refreshing ? '[ LOADING... ]' : '[ REFRESH ]'}
+          </button>
         </div>
       </div>
 
@@ -176,8 +190,12 @@ export default function CRDTView() {
           </div>
           
           {selected && (
-            <div className="p-md border-t border-outline-variant mt-auto">
-              <button className="w-full h-8 bg-black text-on-surface border border-outline-variant hover:bg-primary hover:text-black hover:border-primary font-code-table text-code-table transition-none">
+            <div className="p-md border-t border-outline-variant mt-auto space-y-xs">
+              {msg && <div className="text-primary font-code-table text-code-table mb-xs">{msg}</div>}
+              <button
+                onClick={() => { setMsg(`→ PIVOTING TO BADE: ${selected.id}`); setTimeout(() => { window.location.hash = '#/bade' }, 800) }}
+                className="w-full h-8 bg-black text-on-surface border border-outline-variant hover:bg-primary hover:text-black hover:border-primary font-code-table text-code-table transition-none"
+              >
                 [ INVESTIGATE ASSET ]
               </button>
             </div>

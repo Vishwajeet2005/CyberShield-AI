@@ -47,6 +47,15 @@ export default function AIROView() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action_id: actionId, decision, approver: 'SOC-ANALYST-01' })
       })
+      // Immediately re-fetch incidents so the UI reflects the new status
+      const r = await fetch(`${API}/api/airo/incidents`)
+      if (r.ok) {
+        const fresh = await r.json()
+        setIncidents(fresh)
+        // Update selected to reflect fresh state
+        const freshSelected = fresh.find((i: Incident) => i.id === selected?.id)
+        if (freshSelected) setSelected(freshSelected)
+      }
     } catch { /* no-op */ }
     setApproving(null)
   }
