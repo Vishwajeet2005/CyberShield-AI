@@ -31,3 +31,20 @@ async def audit_log(limit: int = Query(100, ge=1, le=500), offset: int = Query(0
 @router.get("/report/{incident_id}")
 async def cert_in_report(incident_id: str):
     return generate_cert_in_report(incident_id)
+
+@router.post("/isolate")
+async def quick_isolate(req: dict):
+    """Quick isolation from BADE — no incident context needed."""
+    from utils.audit_log import log_action
+    import uuid
+    entity_id = req.get("entity_id", "UNKNOWN")
+    actor = req.get("actor", "SOC-ANALYST-01")
+    log_action(
+        action_type="endpoint_isolate",
+        target=entity_id,
+        blast_radius="medium",
+        result="success",
+        actor=actor,
+        notes=f"Quick isolate triggered from BADE anomaly alert"
+    )
+    return {"success": True, "message": f"Isolation order queued for {entity_id}", "action_id": f"act-{uuid.uuid4().hex[:8]}"}

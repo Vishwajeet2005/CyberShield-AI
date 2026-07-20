@@ -250,14 +250,15 @@ class EventSimulator:
 
     def _generate_alert(self):
         """Generate a new realistic alert."""
-        # Occasionally bias toward attack entities for drama
-        if random.random() < 0.6 and self._attack_step < len(self._attack_entities):
-            target_entity_id = self._attack_entities[self._attack_step]
+        # Occasionally bias toward attack entities for drama, but rotate through them
+        if random.random() < 0.5 and len(self._attack_entities) > 0:
+            # Pick a random attack entity (not always the same one)
+            target_entity_id = random.choice(self._attack_entities)
             attack_entity = next((e for e in self._entities if e["id"] == target_entity_id), None)
             if attack_entity:
                 sev = "critical" if attack_entity["current_score"] >= 80 else "high"
                 template = random.choice([t for t in ALERT_TEMPLATES if t["severity"] == sev] or ALERT_TEMPLATES)
-                self._attack_step = min(self._attack_step + 1, len(self._attack_entities) - 1)
+                self._attack_step = (self._attack_step + 1) % len(self._attack_entities)  # cycle, don't clamp
                 entity = attack_entity
             else:
                 entity = random.choice(self._entities)
