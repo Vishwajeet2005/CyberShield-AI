@@ -133,6 +133,23 @@ def execute_action(incident_id: str, action_id: str, actor: str = "system") -> D
 def approve_action(action_id: str, approver: str, decision: str, notes: str = "") -> Dict:
     """Approve or reject a HIGH blast-radius action."""
     pending = _pending_approvals.get(action_id)
+    
+    if not pending:
+        # Fallback for seeded demo incidents
+        for inc in simulator.get_incidents():
+            for act in inc.get("actions_taken", []):
+                if act.get("id") == action_id and act.get("status") == "awaiting_approval":
+                    playbook = PLAYBOOKS_BY_ID.get(act.get("playbook_id"))
+                    step = next((s for s in playbook.get("steps", []) if s["action_type"] == act.get("action_type")), None) if playbook else None
+                    if step:
+                        pending = {
+                            "incident_id": inc["id"],
+                            "target": act.get("target", "unknown"),
+                            "step": step
+                        }
+                        break
+            if pending: break
+
     if not pending:
         return {"success": False, "message": f"No pending approval found for action {action_id}"}
 

@@ -222,15 +222,24 @@ SECOND_INCIDENT = {
     "id": "incident-002",
     "title": "Anomalous Data Exfiltration — Finance Workstation FIN-02",
     "severity": "high",
-    "status": "open",
+    "status": "investigating",
     "created_at": _ts(minutes_ago=23),
     "updated_at": _ts(minutes_ago=5),
     "affected_entities": ["WORKSTATION-FIN-02"],
     "ttps": ["T1005", "T1041"],
-    "playbook_id": None,
+    "playbook_id": "PB-003",
     "blast_radius": "low",
     "attribution": None,
     "cert_in_reported": False,
     "mttd_minutes": 18.0,
-    "actions_taken": []
+    "actions_taken": [
+        {
+            "id": "act-006", "incident_id": "incident-002", "playbook_id": "PB-003",
+            "action_type": "endpoint_isolate", "target": "WORKSTATION-FIN-02",
+            "status": "awaiting_approval", "blast_radius": "medium",
+            "executed_at": None,
+            "execution_time_ms": None, "result": None,
+            "rollback_available": True, "approved_by": None
+        }
+    ]
 }
