@@ -72,11 +72,20 @@ export default function BADEView() {
   }, [])
 
   const safeAlerts = Array.isArray(alerts) ? alerts : []
-  const filtered = safeAlerts.filter(a => 
+  
+  // Deduplicate by entity_id to ensure the matrix only shows one row per entity (the latest alert)
+  const uniqueAlerts = Array.from(
+    safeAlerts.reduce((map, a) => {
+      if (!map.has(a.entity_id)) map.set(a.entity_id, a)
+      return map
+    }, new Map<string, Alert>()).values()
+  )
+
+  const filtered = uniqueAlerts.filter(a => 
     (a.entity_id || '').includes(filter) || (a.entity_type || '').includes(filter)
   )
-  const criticalCount = safeAlerts.filter(a => (a.score || 0) >= 80).length
-  const warningCount = safeAlerts.filter(a => (a.score || 0) >= 60 && (a.score || 0) < 80).length
+  const criticalCount = uniqueAlerts.filter(a => (a.score || 0) >= 80).length
+  const warningCount = uniqueAlerts.filter(a => (a.score || 0) >= 60 && (a.score || 0) < 80).length
 
   return (
     <>
