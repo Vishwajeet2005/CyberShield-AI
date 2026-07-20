@@ -39,7 +39,7 @@ export default function VPAView() {
           <span>FILTER: ACTIVE</span>
         </div>
         <div className="flex items-center gap-sm flex-1">
-          <span className="text-primary font-bold">[ / ]</span>
+          <span className="text-primary font-bold whitespace-nowrap">[ / ]</span>
           <input 
             className="bg-transparent border-none text-primary placeholder-on-surface-variant focus:ring-0 p-0 w-full font-code-table text-code-table uppercase outline-none" 
             placeholder="QUERY CVE ID..." 

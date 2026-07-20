@@ -73,7 +73,7 @@ export default function AIROView() {
         </div>
         {/* Search/Filter */}
         <div className="p-sm border-b border-outline-variant bg-surface-container-low shrink-0 flex gap-sm focus-within:border-primary">
-          <span className="font-code-table text-code-table text-on-surface-variant mt-1">[ / ]</span>
+          <span className="font-code-table text-code-table text-on-surface-variant mt-1 whitespace-nowrap">[ / ]</span>
           <input
             className="w-full bg-transparent border-none text-on-surface font-code-table text-code-table focus:ring-0 placeholder:text-outline p-0 outline-none"
             placeholder="FILTER QUEUE..."
