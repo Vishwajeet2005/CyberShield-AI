@@ -1,20 +1,22 @@
 import { useState, useEffect } from 'react'
 
 interface Incident {
-  incident_id: string
+  id: string
   title?: string
   severity?: string
   status: string
-  actions?: IncidentAction[]
-  entity_id?: string
+  actions_taken?: IncidentAction[]
+  affected_entities?: string[]
 }
 
 interface IncidentAction {
-  action_id: string
-  name: string
+  id: string
+  action_type: string
+  target: string
   blast_radius: string
   status: string
-  executed: boolean
+  executed_at?: string
+  result?: string
 }
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
@@ -40,7 +42,7 @@ export default function AIROView() {
   const handleApproval = async (actionId: string, decision: 'approve' | 'deny') => {
     setApproving(actionId)
     try {
-      await fetch(`${API}/api/airo/incidents/${selected?.incident_id}/approve`, {
+      await fetch(`${API}/api/airo/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action_id: actionId, decision, approver: 'SOC-ANALYST-01' })
@@ -49,7 +51,7 @@ export default function AIROView() {
     setApproving(null)
   }
 
-  const filtered = incidents.filter(i => (i.incident_id + i.title + i.entity_id).toLowerCase().includes(filter.toLowerCase()))
+  const filtered = incidents.filter(i => (i.id + i.title + (i.affected_entities?.[0]||'')).toLowerCase().includes(filter.toLowerCase()))
 
   return (
     <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-background h-full">
@@ -81,10 +83,10 @@ export default function AIROView() {
             const isHigh = inc.severity === 'HIGH'
             return (
               <div
-                key={inc.incident_id}
+                key={inc.id}
                 onClick={() => setSelected(inc)}
                 className={`p-md border-b border-outline-variant cursor-pointer relative ${
-                  selected?.incident_id === inc.incident_id ? 'bg-surface-container-low' : 'hover:bg-surface-container-low'
+                  selected?.id === inc.id ? 'bg-surface-container-low' : 'hover:bg-surface-container-low'
                 } ${isCrit ? 'border-l-4 border-l-error' : ''}`}
               >
                 <div className="flex justify-between items-start mb-sm">
@@ -97,9 +99,9 @@ export default function AIROView() {
                   </div>
                   <div className="font-code-table text-code-table text-on-surface-variant">{inc.status}</div>
                 </div>
-                <h3 className="font-headline-sm text-headline-sm text-primary mb-xs">{inc.title || inc.incident_id}</h3>
+                <h3 className="font-headline-sm text-headline-sm text-primary mb-xs">{inc.title || inc.id}</h3>
                 <div className="font-code-table text-code-table text-on-surface-variant mb-md">
-                  TARGET: <span className="text-on-surface">{inc.entity_id}</span>
+                  TARGET: <span className="text-on-surface">{inc.affected_entities?.[0] || 'UNKNOWN'}</span>
                 </div>
               </div>
             )
@@ -114,7 +116,7 @@ export default function AIROView() {
           <div className="flex items-center gap-sm">
             <span className="material-symbols-outlined text-primary text-sm">memory</span>
             <h2 className="font-label-caps text-label-caps text-primary tracking-widest">
-              PLAYBOOK_EXECUTION: {selected ? selected.incident_id : 'AWAITING SELECTION'}
+              PLAYBOOK_EXECUTION: {selected ? selected.id : 'AWAITING SELECTION'}
             </h2>
           </div>
           {selected && (
@@ -128,14 +130,14 @@ export default function AIROView() {
         <div className="flex-1 p-md overflow-y-auto font-code-table text-code-table z-10 space-y-md">
           {!selected ? (
             <div className="text-outline">SELECT AN INCIDENT TO VIEW PLAYBOOK STATUS</div>
-          ) : (selected.actions || []).length === 0 ? (
+          ) : (selected.actions_taken || []).length === 0 ? (
             <div className="text-outline">NO PLAYBOOK ACTIONS PENDING OR EXECUTED</div>
           ) : (
-            (selected.actions || []).map((action, idx) => (
+            (selected.actions_taken || []).map((action, idx) => (
               <div key={idx} className={`border p-sm ${action.status === 'awaiting_approval' ? 'border-outline bg-surface-container-high' : 'border-outline-variant bg-background'}`}>
                 <div className="flex justify-between items-center mb-xs">
                   <span className={action.status === 'awaiting_approval' ? 'text-primary font-bold' : 'text-on-surface-variant'}>
-                    &gt; {action.status === 'awaiting_approval' ? 'REQ' : 'EXEC'}: {action.name}
+                    &gt; {action.status === 'awaiting_approval' ? 'REQ' : 'EXEC'}: {action.action_type} - {action.target}
                   </span>
                   <span className="text-on-surface-variant text-[10px] uppercase">BLAST: {action.blast_radius}</span>
                 </div>
@@ -156,7 +158,7 @@ export default function AIROView() {
         </div>
 
         {/* Human-in-the-loop Approval Gate */}
-        {selected && (selected.actions || []).some(a => a.status === 'awaiting_approval') && (
+        {selected && (selected.actions_taken || []).some(a => a.status === 'awaiting_approval') && (
           <div className="shrink-0 p-lg border-t-2 border-error bg-error-container/10 relative z-10 m-md">
             <div className="absolute -top-3 left-4 bg-background px-xs font-label-caps text-label-caps text-error border border-error">
               APPROVAL GATE: REQUIRED ACTION
@@ -164,13 +166,13 @@ export default function AIROView() {
             
             {/* Find the pending action */}
             {(() => {
-              const pendingAction = (selected.actions || []).find(a => a.status === 'awaiting_approval')!
+              const pendingAction = (selected.actions_taken || []).find(a => a.status === 'awaiting_approval')!
               return (
                 <>
                   <div className="mb-md mt-sm">
                     <h3 className="font-headline-sm text-headline-sm text-error mb-xs flex items-center gap-sm">
                       <span className="material-symbols-outlined">warning</span>
-                      {pendingAction.name} ({pendingAction.blast_radius} RADIUS)
+                      {pendingAction.action_type} - {pendingAction.target} ({pendingAction.blast_radius} RADIUS)
                     </h3>
                     <p className="font-code-table text-code-table text-on-surface max-w-2xl">
                       WARNING: Autonomous execution halted due to policy constraints on {pendingAction.blast_radius}-BLAST actions. Please authorize.
@@ -178,16 +180,16 @@ export default function AIROView() {
                   </div>
                   <div className="flex gap-md">
                     <button 
-                      onClick={() => handleApproval(pendingAction.action_id, 'approve')}
-                      disabled={approving === pendingAction.action_id}
+                      onClick={() => handleApproval(pendingAction.id, 'approve')}
+                      disabled={approving === pendingAction.id}
                       className="flex-1 bg-[#00FF00]/10 text-[#00FF00] border border-[#00FF00] p-md font-label-caps text-label-caps tracking-widest hover:bg-[#00FF00] hover:text-black transition-none flex justify-center items-center gap-sm"
                     >
                       <span className="material-symbols-outlined text-sm">check</span>
-                      [ {approving === pendingAction.action_id ? 'PROCESSING...' : 'APPROVE'} ]
+                      [ {approving === pendingAction.id ? 'PROCESSING...' : 'APPROVE'} ]
                     </button>
                     <button 
-                      onClick={() => handleApproval(pendingAction.action_id, 'deny')}
-                      disabled={approving === pendingAction.action_id}
+                      onClick={() => handleApproval(pendingAction.id, 'deny')}
+                      disabled={approving === pendingAction.id}
                       className="flex-1 bg-error/10 text-error border border-error p-md font-label-caps text-label-caps tracking-widest hover:bg-error hover:text-black transition-none flex justify-center items-center gap-sm"
                     >
                       <span className="material-symbols-outlined text-sm">close</span>
