@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 
 interface AuditEntry {
-  log_id: string
-  action_type: string
+  id: number
+  timestamp: string
+  action: string
+  actor: string
   target: string
-  blast_radius: string
   result: string
-  written_at: string
+  hash: string
+  module: string
 }
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
@@ -19,7 +21,7 @@ export default function AuditLogView() {
   useEffect(() => {
     const poll = async () => {
       try {
-        const r = await fetch(`${API}/api/audit/logs`)
+        const r = await fetch(`${API}/api/airo/audit-log`)
         if (r.ok) {
           const newLogs = await r.json()
           setLogs(newLogs)
@@ -39,15 +41,15 @@ export default function AuditLogView() {
   }, [logs, filter])
 
   const filtered = logs.filter(l => 
-    l.action_type.toLowerCase().includes(filter.toLowerCase()) || 
+    l.action.toLowerCase().includes(filter.toLowerCase()) || 
     l.target.toLowerCase().includes(filter.toLowerCase()) ||
-    l.log_id.toLowerCase().includes(filter.toLowerCase())
+    l.id.toString().includes(filter)
   )
 
   const exportCsv = () => {
-    const header = 'LOG_ID,TIMESTAMP,ACTION_TYPE,TARGET,BLAST_RADIUS,RESULT'
+    const header = 'ID,TIMESTAMP,ACTION,ACTOR,TARGET,MODULE,RESULT,HASH'
     const rows = filtered.map(l =>
-      [l.log_id, l.written_at, l.action_type, l.target, l.blast_radius, l.result].join(',')
+      [l.id, l.timestamp, l.action, l.actor, l.target, l.module, l.result, l.hash].join(',')
     )
     const blob = new Blob([header + '\n' + rows.join('\n')], { type: 'text/csv' })
     const url = URL.createObjectURL(blob)
@@ -114,28 +116,27 @@ export default function AuditLogView() {
             <div className="p-md text-outline text-center">NO AUDIT LOGS FOUND</div>
           )}
           {filtered.map((log, i) => {
-            const isError = log.result !== 'success'
+            const isError = log.result.includes('FAIL') || log.result.includes('ERROR')
             const resultText = isError ? '[ FAIL ]' : '[ OK ]'
             const resultClass = isError ? 'text-error' : 'text-[#00FF00]'
             const bgClass = i % 2 === 0 ? 'bg-surface-container-low' : ''
-            const isAlert = log.action_type.includes('CRITICAL') || log.action_type.includes('ALERT')
+            const isAlert = log.action.includes('CRITICAL') || log.action.includes('ALERT')
 
             return (
               <div 
-                key={log.log_id} 
+                key={log.id} 
                 className={`grid grid-cols-12 gap-gutter p-sm border-b border-outline-variant hover:bg-surface-container-high transition-none ${bgClass} ${isAlert ? 'bg-error-container/20 text-on-error-container' : ''}`}
               >
                 <div className="col-span-2 text-on-surface-variant">
-                  {new Date(log.written_at).toISOString().replace(/\.\d{3}Z$/, 'Z')}
+                  {new Date(log.timestamp).toISOString().replace(/\.\d{3}Z$/, 'Z')}
                 </div>
-                <div className={`col-span-3 ${isError ? 'text-error' : 'text-primary'}`}>
-                  {log.action_type} <span className="text-outline-variant ml-xs">[{log.blast_radius}]</span>
+                <div className={`col-span-3 ${isError ? 'text-error' : 'text-primary'} truncate`} title={log.action}>
+                  {log.action} <span className="text-outline-variant ml-xs">[{log.module}]</span>
                 </div>
                 <div className="col-span-3 text-on-surface-variant truncate">{log.target}</div>
                 <div className={`col-span-1 ${resultClass}`}>{resultText}</div>
-                <div className="col-span-3 text-on-surface-variant truncate font-mono text-[10px]">
-                  {/* Simulate SHA256 of log entry */}
-                  {Array.from(log.log_id.replace(/-/g, '')).map(c => c.charCodeAt(0).toString(16)).join('').padEnd(64, '0').slice(0,64)}
+                <div className="col-span-3 text-on-surface-variant truncate font-mono text-[10px]" title={log.hash}>
+                  {log.hash}
                 </div>
               </div>
             )
