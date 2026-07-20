@@ -24,14 +24,14 @@ export default function CRDTView() {
   const [edges, setEdges] = useState<TopoEdge[]>([])
   const [selected, setSelected] = useState<TopoNode | null>(null)
   const svgRef = useRef<SVGSVGElement>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const [refreshing, setRefreshing] = useState(false)
 
-  // Pan and Zoom state
+  // Zoom and Scroll Pan state
   const [scale, setScale] = useState(1)
-  const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
 
   const fetchTopo = async () => {
     setRefreshing(true)
@@ -80,7 +80,10 @@ export default function CRDTView() {
             ZOOM: {(scale * 100).toFixed(0)}%
           </span>
           <button
-            onClick={() => { setScale(1); setPan({x: 0, y: 0}) }}
+            onClick={() => { 
+              setScale(1); 
+              if(scrollRef.current) { scrollRef.current.scrollLeft = 0; scrollRef.current.scrollTop = 0; }
+            }}
             className="px-sm py-xs text-code-table font-code-table bg-black border border-outline-variant hover:bg-surface-container-high text-on-surface transition-none"
           >
             [ RESET VIEW ]
@@ -98,20 +101,32 @@ export default function CRDTView() {
       <div className="flex-1 relative overflow-hidden flex w-full">
         {/* Network Topology SVG Area */}
         <div 
-          className={`flex-1 relative overflow-hidden z-10 w-full h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          ref={scrollRef}
+          className={`flex-1 relative overflow-auto z-10 w-full h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
           onWheel={(e) => {
-            const zoomSensitivity = 0.001
-            const delta = -e.deltaY * zoomSensitivity
-            setScale(s => Math.min(Math.max(0.1, s + delta), 5))
+            if (e.ctrlKey || e.metaKey) {
+              const zoomSensitivity = 0.005
+              const delta = -e.deltaY * zoomSensitivity
+              setScale(s => Math.min(Math.max(0.1, s + delta), 5))
+            }
           }}
           onPointerDown={(e) => {
+            if (e.button !== 0) return // Only left click drag
             setIsDragging(true)
-            setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y })
+            if (scrollRef.current) {
+              setDragStart({ 
+                x: e.clientX, 
+                y: e.clientY, 
+                scrollLeft: scrollRef.current.scrollLeft, 
+                scrollTop: scrollRef.current.scrollTop 
+              })
+            }
             e.currentTarget.setPointerCapture(e.pointerId)
           }}
           onPointerMove={(e) => {
-            if (isDragging) {
-              setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y })
+            if (isDragging && scrollRef.current) {
+              scrollRef.current.scrollLeft = dragStart.scrollLeft - (e.clientX - dragStart.x)
+              scrollRef.current.scrollTop = dragStart.scrollTop - (e.clientY - dragStart.y)
             }
           }}
           onPointerUp={(e) => {
@@ -122,15 +137,20 @@ export default function CRDTView() {
             setIsDragging(false)
           }}
         >
-          <div 
-            className="absolute shadow-2xl transition-transform duration-75 ease-out"
-            style={{ 
-              top: '50%', left: '50%',
-              transform: `translate(calc(-50% + ${pan.x}px), calc(-50% + ${pan.y}px)) scale(${scale})`, 
-              width: W, height: H 
-            }}
-          >
-            <div className="relative border border-[#333] bg-black bg-opacity-80 w-full h-full">
+          {/* Centering and Scaling Wrapper */}
+          <div className="min-w-full min-h-full flex items-center justify-center p-xl">
+            <div 
+              className="relative shadow-2xl transition-all duration-75 ease-out"
+              style={{ width: W * scale, height: H * scale }}
+            >
+              <div 
+                className="relative border border-[#333] bg-black bg-opacity-80"
+                style={{ 
+                  transform: `scale(${scale})`, 
+                  transformOrigin: 'top left', 
+                  width: W, height: H 
+                }}
+              >
               {nodes.length === 0 ? (
                 <div className="absolute inset-0 flex items-center justify-center font-code-table text-outline">LOADING TOPOLOGY...</div>
               ) : (
@@ -180,6 +200,7 @@ export default function CRDTView() {
                 })}
               </svg>
             )}
+              </div>
             </div>
           </div>
         </div>
