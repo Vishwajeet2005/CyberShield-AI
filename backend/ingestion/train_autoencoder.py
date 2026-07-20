@@ -19,8 +19,8 @@ except ImportError:
     class DummyNNModule:
         def __init__(self, *args, **kwargs): pass
     nn = type('DummyNN', (), {'Module': DummyNNModule, 'LSTM': DummyNNModule, 'Linear': DummyNNModule})()
-    dummy_cuda = type('DummyCuda', (), {'is_available': lambda: False})()
-    torch = type('DummyTorch', (), {'Tensor': object, 'load': lambda x, **kwargs: None, 'no_grad': lambda: (yield), 'device': lambda x: None, 'tensor': lambda x, **kwargs: None, 'cuda': dummy_cuda})()
+    dummy_cuda = type('DummyCuda', (), {'is_available': lambda *args, **kwargs: False})()
+    torch = type('DummyTorch', (), {'Tensor': object, 'load': lambda *args, **kwargs: None, 'no_grad': lambda *args, **kwargs: (yield), 'device': lambda *args, **kwargs: None, 'tensor': lambda *args, **kwargs: None, 'cuda': dummy_cuda})()
     DataLoader = object
     TensorDataset = object
 
