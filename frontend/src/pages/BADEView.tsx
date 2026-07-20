@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react'
 
 interface Alert {
-  alert_id: string
-  entity_id: string
-  entity_type: string
-  anomaly_score: number
-  severity: string
-  top_features: string[]
+  id: string
   timestamp: string
+  severity: string
+  entity_id: string
+  entity_name: string
+  entity_type: string
+  score: number
+  description: string
+  module: string
+  ttps: string[]
   status: string
+  mitre_tactics: string[]
 }
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
@@ -44,8 +48,8 @@ export default function BADEView() {
   const filtered = safeAlerts.filter(a => 
     (a.entity_id || '').includes(filter) || (a.entity_type || '').includes(filter)
   )
-  const criticalCount = safeAlerts.filter(a => (a.anomaly_score || 0) >= 80).length
-  const warningCount = safeAlerts.filter(a => (a.anomaly_score || 0) >= 60 && (a.anomaly_score || 0) < 80).length
+  const criticalCount = safeAlerts.filter(a => (a.score || 0) >= 80).length
+  const warningCount = safeAlerts.filter(a => (a.score || 0) >= 60 && (a.score || 0) < 80).length
 
   return (
     <>
@@ -98,23 +102,23 @@ export default function BADEView() {
                   </tr>
                 )}
                 {filtered.map(a => {
-                  const isCrit = a.anomaly_score >= 80
-                  const isHigh = a.anomaly_score >= 60 && !isCrit
+                  const isCrit = a.score >= 80
+                  const isHigh = a.score >= 60 && !isCrit
                   return (
                     <tr
-                      key={a.alert_id}
+                      key={a.id}
                       onClick={() => setSelected(a)}
                       className={`border-b border-outline-variant cursor-pointer ${
-                        selected?.alert_id === a.alert_id ? 'bg-surface-container-highest' :
+                        selected?.id === a.id ? 'bg-surface-container-highest' :
                         isCrit ? 'bg-error-container/20 hover:bg-surface-container-high' : 'hover:bg-surface-container-high'
                       }`}
                     >
                       <td className={`p-sm font-bold ${isCrit ? 'text-error' : 'text-on-surface'}`}>
-                        {a.entity_id || 'UNKNOWN'} {selected?.alert_id === a.alert_id && <span className="blink-cursor">_</span>}
+                        {a.entity_id || 'UNKNOWN'} {selected?.id === a.id && <span className="blink-cursor">_</span>}
                       </td>
                       <td className="p-sm">{a.entity_type || 'UNKNOWN'}</td>
                       <td className={`p-sm ${isCrit ? 'text-error' : isHigh ? 'text-surface-tint' : ''}`}>
-                        {(a.anomaly_score || 0).toFixed(1)}
+                        {(a.score || 0).toFixed(1)}
                       </td>
                       <td className="p-sm">{tsRelative(a.timestamp || '')}</td>
                       <td className="p-sm">
@@ -171,7 +175,7 @@ export default function BADEView() {
                 <>
                   <div className="grid grid-cols-2 border-b border-outline-variant pb-xs">
                     <span className="text-outline">ALERT ID:</span>
-                    <span className="text-right">{selected.alert_id.split('-')[0]}...</span>
+                    <span className="text-right">{selected.id.split('-')[0]}...</span>
                   </div>
                   <div className="grid grid-cols-2 border-b border-outline-variant pb-xs">
                     <span className="text-outline">TYPE:</span>
@@ -184,7 +188,7 @@ export default function BADEView() {
                   <div className="mt-sm">
                     <span className="text-outline block mb-xs">ANOMALY VECTORS:</span>
                     <ul className="list-none space-y-xs">
-                      {(selected.top_features || []).map((f, i) => (
+                      {(selected.mitre_tactics || selected.ttps || []).map((f, i) => (
                         <li key={i} className="text-error">&gt; {f.toUpperCase()}</li>
                       ))}
                     </ul>
