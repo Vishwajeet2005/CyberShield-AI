@@ -1,14 +1,12 @@
 import { useState } from 'react'
 
 interface Attribution {
-  threat_actor?: string
-  actor_type?: string
-  origin_country?: string
+  attributed_actor?: string
   confidence?: number
-  campaign_name?: string
-  techniques?: { id: string; name: string; tactic: string }[]
-  next_stage?: string[]
+  current_ttps?: string[]
+  predicted_next_ttps?: string[]
   justification?: string
+  status?: string
 }
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
@@ -37,7 +35,7 @@ export default function AAPAView() {
       const r = await fetch(`${API}/api/aapa/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entity)
+        body: JSON.stringify({ entity, alerts: [] })
       })
       if (!r.ok) throw new Error(`HTTP ${r.status}`)
       setAttr(await r.json())
@@ -101,12 +99,12 @@ export default function AAPAView() {
                 <div className="flex justify-between items-end mb-md border-b border-outline-variant pb-sm">
                   <div>
                     <div className="font-label-caps text-label-caps text-on-surface-variant">PRIMARY SUSPECT</div>
-                    <div className="font-display-lg text-display-lg text-primary">{attr.threat_actor ?? 'UNKNOWN'}</div>
+                    <div className="font-display-lg text-display-lg text-primary">{attr.attributed_actor ?? 'UNKNOWN'}</div>
                   </div>
                   <div className="text-right">
                     <div className="font-label-caps text-label-caps text-on-surface-variant">CONFIDENCE LEVEL</div>
                     <div className="font-headline-md text-headline-md text-primary">
-                      {attr.confidence != null ? `${(attr.confidence * 100).toFixed(1)}%` : '--'}
+                      {attr.confidence != null ? `${attr.confidence.toFixed(1)}%` : '--'}
                     </div>
                   </div>
                 </div>
@@ -114,26 +112,24 @@ export default function AAPAView() {
                 <div className="flex-1">
                   <div className="font-label-caps text-label-caps text-on-surface-variant mb-xs">// OBSERVED TTPs (MITRE ATT&CK)</div>
                   <div className="grid grid-cols-2 gap-gutter bg-[#333333] mb-md">
-                    {(attr.techniques || []).length === 0 && (
+                    {(attr.current_ttps || []).length === 0 && (
                       <div className="bg-background p-xs col-span-2 text-outline font-code-table">NO TTPs IDENTIFIED</div>
                     )}
-                    {(attr.techniques || []).map((t, i) => (
+                    {(attr.current_ttps || []).map((t, i) => (
                       <div key={i} className="bg-background p-xs border border-transparent hover:border-primary">
-                        <div className="font-code-table text-code-table text-on-surface-variant">{t.id}</div>
-                        <div className="font-body-sm">{t.name}</div>
-                        <div className="font-label-caps text-outline mt-xs">{t.tactic}</div>
+                        <div className="font-code-table text-code-table text-on-surface-variant">{t}</div>
                       </div>
                     ))}
                   </div>
 
-                  {attr.next_stage && attr.next_stage.length > 0 && (
+                  {attr.predicted_next_ttps && attr.predicted_next_ttps.length > 0 && (
                     <>
                       <div className="font-label-caps text-label-caps text-on-surface-variant mb-xs mt-md">
                         // PREDICTED ADVERSARY TRAJECTORY
                       </div>
                       <div className="bg-surface-dim p-sm border border-outline-variant">
                         <ul className="font-code-table text-code-table space-y-xs">
-                          {attr.next_stage.map((s, i) => (
+                          {attr.predicted_next_ttps.map((s, i) => (
                             <li key={i} className="flex items-start gap-sm">
                               <span className="text-error mt-[2px]">&gt;</span>
                               <div className="text-on-surface">{s}</div>
