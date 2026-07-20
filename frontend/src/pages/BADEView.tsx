@@ -147,7 +147,6 @@ export default function BADEView() {
                 <line stroke="#353434" strokeDasharray="2,2" strokeWidth="0.5" x1="0" x2="100" y1="25" y2="25"></line>
                 <line stroke="#353434" strokeDasharray="2,2" strokeWidth="0.5" x1="0" x2="100" y1="50" y2="50"></line>
                 <line stroke="#353434" strokeDasharray="2,2" strokeWidth="0.5" x1="0" x2="100" y1="75" y2="75"></line>
-                <rect fill="#2a2a2a" height="40" opacity="0.3" width="100" x="0" y="60"></rect>
                 <polyline fill="none" points="0,70 10,65 20,68 30,50 40,55 50,30 60,35 70,15 80,40 90,20 100,5" stroke="#c6c6c6" strokeWidth="1"></polyline>
                 <line stroke="#ffb4ab" strokeDasharray="4,2" strokeWidth="1" x1="0" x2="100" y1="20" y2="20"></line>
               </svg>
