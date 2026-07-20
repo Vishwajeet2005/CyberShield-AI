@@ -182,7 +182,7 @@ export default function CRDTView() {
                   const isCrit = n.criticality === 'CRITICAL'
                   const isSelected = selected?.id === n.id
                   return (
-                    <g key={n.id} onClick={() => setSelected(n)} style={{ cursor: 'pointer' }}>
+                    <g key={n.id} onClick={() => setSelected(n)} onPointerDown={(e) => e.stopPropagation()} style={{ cursor: 'pointer' }}>
                       <rect x={p.x - 40} y={p.y - 20} width={80} height={40}
                         fill={isCrit ? 'rgba(255, 180, 171, 0.1)' : '#111'} 
                         stroke={isSelected ? '#fdfdfc' : isCrit ? '#ffb4ab' : '#333'}
