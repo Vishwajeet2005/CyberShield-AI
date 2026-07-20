@@ -6,7 +6,7 @@ import VPAView from './pages/VPAView'
 import CRDTView from './pages/CRDTView'
 import AuditLogView from './pages/AuditLogView'
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
 interface Metrics {
   tpr?: string | number

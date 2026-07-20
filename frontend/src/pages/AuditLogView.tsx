@@ -9,7 +9,7 @@ interface AuditEntry {
   written_at: string
 }
 
-const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const API = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
 export default function AuditLogView() {
   const [logs, setLogs] = useState<AuditEntry[]>([])
