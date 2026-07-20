@@ -59,9 +59,9 @@ export default function App() {
   }, [])
 
   return (
-    <div className="bg-background text-on-surface font-body-lg min-h-screen flex overflow-hidden">
+    <div className="bg-background text-on-surface font-body-lg min-h-screen w-full flex overflow-hidden">
       {/* SideNavBar */}
-      <nav className="fixed left-0 top-0 h-full w-64 bg-background dark:bg-background border-r border-outline-variant flex flex-col z-20">
+      <nav className="w-64 shrink-0 h-screen bg-background dark:bg-background border-r border-outline-variant flex flex-col z-20">
         <div className="p-md border-b border-outline-variant flex flex-col gap-xs">
           <h1 className="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary tracking-tighter">SOC-PRIME</h1>
           <p className="font-code-table text-code-table text-on-surface-variant">NODE-01.SYSTEM.RESILIENCE</p>
@@ -88,7 +88,7 @@ export default function App() {
       </nav>
 
       {/* Main Content Area */}
-      <div className="flex-1 ml-64 flex flex-col h-screen min-w-0">
+      <div className="flex-1 flex flex-col h-screen min-w-0">
         {/* TopAppBar */}
         <header className="flex justify-between items-center h-12 px-md border-b border-outline-variant w-full bg-background dark:bg-background z-10 shrink-0 overflow-x-auto whitespace-nowrap">
           <div className="font-label-caps text-label-caps font-bold text-primary dark:text-primary flex items-center gap-2">
