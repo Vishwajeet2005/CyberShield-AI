@@ -55,6 +55,19 @@ def simulate_attack():
     print_typewriter("    -> Action 3: Revoke compromised user tokens [BLAST RADIUS: MEDIUM]")
     
     print_typewriter("\n[*] ALERT PUSHED TO CYBERSHIELD AI DASHBOARD.")
+    
+    # ── ACTUALLY HIT THE BACKEND API ──
+    try:
+        import urllib.request
+        import json
+        url = "http://localhost:8000/api/system/demo-trigger"
+        req = urllib.request.Request(url, method="POST")
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode())
+            print(f"    -> [SUCCESS] Real incident created: {data.get('incident_id')}")
+    except Exception as e:
+        print(f"    -> [!] Could not reach backend at {url}: {e}")
+
     print("\n" + "="*70)
     print("✅ DEMO TRIGGER COMPLETE. PLEASE CHECK THE AIRO PLAYBOOK DASHBOARD.")
     print("="*70 + "\n")
