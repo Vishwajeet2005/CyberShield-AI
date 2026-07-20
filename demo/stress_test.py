@@ -21,7 +21,7 @@ async def trigger_incident(session, req_id):
 
 async def stress_test():
     print("="*60)
-    print("🔥 CYBERSHIELD AI - STRESS TEST & LOAD GENERATOR 🔥")
+    print("================ CYBERSHIELD AI - STRESS TEST & LOAD GENERATOR ================")
     print("="*60)
     print(f"[*] Target: {API_URL}")
     print(f"[*] Firing {TARGET_REQUESTS} concurrent incident triggers to simulate a massive synchronized APT attack...\n")

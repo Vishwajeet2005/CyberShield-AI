@@ -91,8 +91,22 @@ CyberShield AI Autonomous Incident Response Orchestrator
   const filtered = incidents.filter(i => (i.id + i.title + (i.affected_entities?.[0]||'')).toLowerCase().includes(filter.toLowerCase()))
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-background h-full">
-      {/* LEFT: Active Incidents Queue */}
+    <div className="flex-1 flex flex-col h-full bg-background overflow-hidden">
+      {/* Page Header */}
+      <div className="flex justify-between items-end border-b border-outline-variant pb-sm bg-background p-sm z-10 shrink-0">
+        <div>
+          <h2 className="font-display-lg text-display-lg text-primary glitch-text uppercase">AUTONOMOUS INCIDENT RESPONSE ORCHESTRATOR</h2>
+          <p className="font-code-table text-code-table text-on-surface-variant mt-xs">&gt; PLAYBOOK EXECUTION & BLAST-RADIUS GATING [STANDBY]</p>
+        </div>
+        <div className="flex gap-sm">
+          <span className="font-code-table text-code-table text-[#FFA500] border border-[#FFA500]/30 px-xs py-0.5 bg-[#FFA500]/10">
+            [ PENDING APPROVALS: {(incidents.flatMap(i => i.actions_taken || [])).filter(a => a.status === 'awaiting_approval').length} ]
+          </span>
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
+        {/* LEFT: Active Incidents Queue */}
       <section className="flex-1 flex flex-col border-r border-outline-variant h-full overflow-hidden min-w-[320px]">
         {/* Header */}
         <div className="p-sm border-b border-outline-variant bg-surface-container-high flex justify-between items-center shrink-0">
@@ -252,6 +266,7 @@ CyberShield AI Autonomous Incident Response Orchestrator
           </div>
         )}
       </section>
+      </div>
     </div>
   )
 }

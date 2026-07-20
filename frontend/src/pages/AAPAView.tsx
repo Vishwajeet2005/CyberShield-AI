@@ -48,11 +48,16 @@ export default function AAPAView() {
 
   return (
     <div className="flex flex-col h-full bg-surface-dim relative">
-      {/* Header */}
-      <div className="p-sm border-b border-outline-variant bg-background flex justify-between items-center sticky top-0 z-10">
-        <h1 className="font-headline-sm text-headline-sm text-primary uppercase">Advanced Persistent Threat Attribution [AAPA]</h1>
-        {loading && <div className="font-code-table text-code-table text-error animate-pulse">[!! ANALYZING !!]</div>}
-        {attr && !loading && <div className="font-code-table text-code-table text-error">[!! CAMPAIGN IDENTIFIED !!]</div>}
+      {/* Page Header */}
+      <div className="flex justify-between items-end border-b border-outline-variant pb-sm bg-background p-sm z-10">
+        <div>
+          <h2 className="font-display-lg text-display-lg text-primary glitch-text uppercase">APT ATTRIBUTION & PREDICTION AGENT</h2>
+          <p className="font-code-table text-code-table text-on-surface-variant mt-xs">&gt; MITRE ATT&CK KNOWLEDGE GRAPH [ANALYZING]</p>
+        </div>
+        <div className="flex gap-sm">
+          {loading && <div className="font-code-table text-code-table text-error animate-pulse">[!! ANALYZING !!]</div>}
+          {attr && !loading && <div className="font-code-table text-code-table text-error">[!! CAMPAIGN IDENTIFIED !!]</div>}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 flex-1 auto-rows-min md:auto-rows-fr gap-gutter bg-[#333333]">

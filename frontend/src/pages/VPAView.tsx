@@ -32,6 +32,18 @@ export default function VPAView() {
 
   return (
     <div className="flex-1 overflow-hidden bg-surface-container-lowest flex flex-col h-full relative">
+      {/* Page Header */}
+      <div className="flex justify-between items-end border-b border-outline-variant pb-sm bg-background p-sm z-10 shrink-0">
+        <div>
+          <h2 className="font-display-lg text-display-lg text-primary glitch-text uppercase">VULNERABILITY PRIORITISATION AGENT</h2>
+          <p className="font-code-table text-code-table text-on-surface-variant mt-xs">&gt; CONTEXT-AWARE CVE EXPLOITABILITY SCORING [ACTIVE]</p>
+        </div>
+        <div className="flex gap-sm">
+          <span className="font-code-table text-code-table text-error border border-error/30 px-xs py-0.5 bg-error/10 animate-pulse">
+            [ CISA KEV SYNC: OK ]
+          </span>
+        </div>
+      </div>
       {/* Search / Filter Bar (Utilitarian) */}
       <div className="sticky top-0 bg-background border-b border-outline-variant flex items-center px-sm py-xs gap-md z-10 font-code-table text-code-table shrink-0">
         <div className="flex items-center gap-sm text-on-surface-variant border-r border-outline-variant pr-md">

@@ -69,12 +69,16 @@ export default function CRDTView() {
 
   return (
     <div className="flex-1 relative overflow-hidden flex flex-col bg-surface-container-lowest grid-bg h-full w-full">
-      {/* Canvas Header */}
-      <div className="h-10 border-b border-outline-variant flex items-center px-md justify-between bg-black z-20 shrink-0 w-full">
-        <div className="font-code-table text-code-table text-on-surface font-bold">
-          [ VIEW: DIGITAL TWIN TOPOLOGY ] ({nodes.length} NODES / {edges.length} EDGES)
+      {/* Page Header */}
+      <div className="flex justify-between items-end border-b border-outline-variant pb-sm bg-black p-sm z-20 shrink-0 w-full">
+        <div>
+          <h2 className="font-display-lg text-display-lg text-primary glitch-text uppercase">CYBER RESILIENCE DIGITAL TWIN</h2>
+          <p className="font-code-table text-code-table text-on-surface-variant mt-xs">&gt; INTERACTIVE NETWORK TOPOLOGY & ATTACK PATH GRAPH [RENDERED]</p>
         </div>
         <div className="flex gap-sm items-center">
+          <div className="font-code-table text-code-table text-on-surface font-bold mr-md">
+            ({nodes.length} NODES / {edges.length} EDGES)
+          </div>
           <button
             onClick={fetchTopo}
             disabled={refreshing}

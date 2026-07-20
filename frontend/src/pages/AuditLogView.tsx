@@ -67,10 +67,10 @@ export default function AuditLogView() {
 
   return (
     <div className="flex-1 overflow-hidden bg-surface p-md flex flex-col gap-md h-full">
-      <div className="flex justify-between items-end border-b border-outline-variant pb-xs shrink-0">
+      <div className="flex justify-between items-end border-b border-outline-variant pb-xs shrink-0 bg-background p-sm z-10 w-full">
         <div>
-          <h1 className="font-headline-md text-headline-md text-primary">IMMUTABLE AUDIT LOG</h1>
-          <p className="font-code-table text-code-table text-on-surface-variant mt-xs">APPEND-ONLY SYSTEM LEDGER // INTEGRITY VERIFIED</p>
+          <h2 className="font-display-lg text-display-lg text-primary glitch-text uppercase">IMMUTABLE EVIDENCE VAULT</h2>
+          <p className="font-code-table text-code-table text-on-surface-variant mt-xs">&gt; APPEND-ONLY HASH-CHAINED SYSTEM LEDGER [VERIFIED]</p>
         </div>
         <div className="flex gap-sm">
           <button

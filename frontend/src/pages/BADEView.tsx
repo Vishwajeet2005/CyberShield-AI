@@ -92,7 +92,7 @@ export default function BADEView() {
       {/* Page Header */}
       <div className="flex justify-between items-end border-b border-outline-variant pb-sm">
         <div>
-          <h2 className="font-display-lg text-display-lg text-primary">BEHAVIOURAL ANOMALY DETECTION ENGINE</h2>
+          <h2 className="font-display-lg text-display-lg text-primary glitch-text">BEHAVIOURAL ANOMALY DETECTION ENGINE</h2>
           <p className="font-code-table text-code-table text-on-surface-variant mt-xs">&gt; MONITORING NETWORK ENTITIES [ACTIVE]</p>
         </div>
         <div className="flex gap-sm">
