@@ -5,7 +5,7 @@ interface TopoNode {
   label: string
   type: string
   criticality: string
-  segment: string
+  department: string
   cves: string[]
 }
 
@@ -32,17 +32,17 @@ export default function CRDTView() {
       .catch(() => {})
   }, [])
 
-  // Minimal force-free layout — group by segment, stack vertically
+  // Minimal force-free layout — group by department, stack vertically
   const W = 800, H = 600
-  const segments = [...new Set(nodes.map(n => n.segment))].filter(Boolean)
-  const segW = segments.length > 0 ? W / segments.length : W
+  const departments = [...new Set(nodes.map(n => n.department))].filter(Boolean)
+  const segW = departments.length > 0 ? W / departments.length : W
 
   const pos: Record<string, { x: number; y: number }> = {}
   const segCount: Record<string, number> = {}
   nodes.forEach(n => {
-    const si = segments.indexOf(n.segment)
-    const idx = segCount[n.segment] ?? 0
-    segCount[n.segment] = idx + 1
+    const si = departments.indexOf(n.department)
+    const idx = segCount[n.department] ?? 0
+    segCount[n.department] = idx + 1
     pos[n.id] = { x: (si + 0.5) * segW, y: 80 + idx * 80 }
   })
 
@@ -81,12 +81,12 @@ export default function CRDTView() {
                     />
                   )
                 })}
-                {/* Segment labels */}
-                {segments.map((seg, i) => (
-                  <text key={seg} x={(i + 0.5) * segW} y={30} textAnchor="middle"
+                {/* Department labels */}
+                {departments.map((dept, i) => (
+                  <text key={dept} x={(i + 0.5) * segW} y={30} textAnchor="middle"
                     fontSize={12} fill="#777" fontFamily="JetBrains Mono, monospace" fontWeight="bold"
                     letterSpacing="0.1em">
-                    {seg}
+                    {dept}
                   </text>
                 ))}
                 {/* Nodes */}
@@ -144,8 +144,8 @@ export default function CRDTView() {
                     <span className="text-on-surface">{selected.type}</span>
                   </div>
                   <div className="flex justify-between mb-xs">
-                    <span className="text-outline">SEGMENT:</span>
-                    <span className="text-on-surface">{selected.segment}</span>
+                    <span className="text-outline">DEPARTMENT:</span>
+                    <span className="text-on-surface">{selected.department}</span>
                   </div>
                   <div className="flex justify-between mt-sm pt-sm border-t border-outline-variant">
                     <span className="text-outline">CRITICALITY:</span>
