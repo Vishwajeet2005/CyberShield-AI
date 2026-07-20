@@ -58,6 +58,13 @@ export default function App() {
     return () => clearInterval(id)
   }, [])
 
+  // Allow child pages to navigate by dispatching: window.dispatchEvent(new CustomEvent('navigate-view', { detail: 'airo' }))
+  useEffect(() => {
+    const handler = (e: Event) => setView((e as CustomEvent<string>).detail)
+    window.addEventListener('navigate-view', handler)
+    return () => window.removeEventListener('navigate-view', handler)
+  }, [])
+
   return (
     <div className="bg-background text-on-surface font-body-lg min-h-screen w-full flex overflow-hidden">
       {/* SideNavBar */}

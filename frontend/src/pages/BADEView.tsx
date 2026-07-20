@@ -43,21 +43,20 @@ export default function BADEView() {
     if (!selected) return
     setBusy(true)
     try {
-      const r = await fetch(`${API}/api/airo/actions`, {
+      const r = await fetch(`${API}/api/airo/execute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ incident_id: selected.id, action_type: 'endpoint_isolate', target: selected.entity_id })
+        body: JSON.stringify({ incident_id: selected.id, action_id: 'endpoint_isolate', actor: 'SOC-ANALYST-01' })
       })
       if (r.ok) showMsg(`✓ ISOLATION ORDER SENT FOR ${selected.entity_id}`)
-      else showMsg(`✗ ISOLATE FAILED — CHECK AIRO MODULE`)
+      else showMsg(`✗ ISOLATE FAILED — ${(await r.json())?.message ?? 'CHECK AIRO MODULE'}`)
     } catch { showMsg('✗ BACKEND UNREACHABLE') }
     setBusy(false)
   }
 
   const handleInvestigate = () => {
     if (!selected) return
-    showMsg(`→ PIVOT: NAVIGATE TO AIRO FOR ${selected.entity_id}`)
-    window.location.hash = '#/airo'
+    window.dispatchEvent(new CustomEvent('navigate-view', { detail: 'airo' }))
   }
 
   useEffect(() => {
