@@ -137,7 +137,7 @@ export default function BADEView() {
         {/* Side Panel (Charts & Details) */}
         <div className="col-span-12 xl:col-span-4 flex flex-col gap-md h-full">
           {/* Trend Chart Module (Simplified) */}
-          <div className="border border-outline-variant bg-surface-container flex flex-col shrink-0 h-[40%] min-h-[200px]">
+          <div className="border border-outline-variant bg-surface-container flex flex-col shrink-0 h-[30%] min-h-[120px]">
             <div className="border-b border-outline-variant p-sm bg-surface-container-high flex justify-between items-center">
               <span className="font-label-caps text-label-caps text-primary">[ GLOBAL ANOMALY TREND ]</span>
               <span className="font-code-table text-code-table text-outline">T-1H</span>
