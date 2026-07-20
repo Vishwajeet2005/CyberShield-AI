@@ -118,6 +118,10 @@ class FeedbackRequest(BaseModel):
     feedback_type: str  # "true_positive" | "false_positive"
     analyst_notes: Optional[str] = None
 
+class IsolateRequest(BaseModel):
+    alert_id: str
+    entity_id: str
+
 class FeedbackResponse(BaseModel):
     success: bool
     message: str

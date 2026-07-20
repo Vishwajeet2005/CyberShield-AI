@@ -190,7 +190,8 @@ export default function CRDTView() {
           </div>
           
           {selected && (
-            <div className="p-md border-t border-outline-variant mt-auto">
+            <div className="p-md border-t border-outline-variant mt-auto space-y-xs">
+              {msg && <div className="text-primary font-code-table text-code-table mb-xs">{msg}</div>}
               <button
                 onClick={() => { window.dispatchEvent(new CustomEvent('navigate-view', { detail: 'bade' })) }}
                 className="w-full h-8 bg-black text-on-surface border border-outline-variant hover:bg-primary hover:text-black hover:border-primary font-code-table text-code-table transition-none"

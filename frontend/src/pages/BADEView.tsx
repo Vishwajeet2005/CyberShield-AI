@@ -43,14 +43,13 @@ export default function BADEView() {
     if (!selected) return
     setBusy(true)
     try {
-      const r = await fetch(`${API}/api/airo/isolate`, {
+      const r = await fetch(`${API}/api/bade/isolate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ entity_id: selected.entity_id, actor: 'SOC-ANALYST-01' })
+        body: JSON.stringify({ alert_id: selected.id, entity_id: selected.entity_id })
       })
-      const data = await r.json()
-      if (r.ok && data.success) showMsg(`✓ ISOLATION ORDER QUEUED FOR ${selected.entity_id}`)
-      else showMsg(`✗ ISOLATE FAILED — ${data.message ?? 'UNKNOWN ERROR'}`)
+      if (r.ok) showMsg(`✓ ISOLATION ORDER SENT FOR ${selected.entity_id}`)
+      else showMsg(`✗ ISOLATE FAILED — ${(await r.json())?.message ?? 'CHECK BADE MODULE'}`)
     } catch { showMsg('✗ BACKEND UNREACHABLE') }
     setBusy(false)
   }
