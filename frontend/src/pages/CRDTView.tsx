@@ -117,8 +117,8 @@ export default function CRDTView() {
             setIsDragging(false)
           }}
         >
-          {/* Centering Wrapper */}
-          <div className="min-w-full min-h-full flex items-center justify-center p-xl">
+          {/* Content Wrapper */}
+          <div className="w-max h-max p-xl">
             <div 
               className="relative shadow-2xl transition-all duration-75 ease-out"
               style={{ width: W, height: H }}
