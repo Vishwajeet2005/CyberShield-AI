@@ -27,6 +27,12 @@ export default function CRDTView() {
 
   const [refreshing, setRefreshing] = useState(false)
 
+  // Pan and Zoom state
+  const [scale, setScale] = useState(1)
+  const [pan, setPan] = useState({ x: 0, y: 0 })
+  const [isDragging, setIsDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+
   const fetchTopo = async () => {
     setRefreshing(true)
     try {
@@ -63,13 +69,22 @@ export default function CRDTView() {
   const nodeColor = (n: TopoNode) => CRIT_COLOR[n.criticality] ?? '#2a2a2a'
 
   return (
-    <div className="flex-1 relative overflow-hidden flex flex-col bg-surface-container-lowest grid-bg h-full">
+    <div className="flex-1 relative overflow-hidden flex flex-col bg-surface-container-lowest grid-bg h-full w-full">
       {/* Canvas Header */}
-      <div className="h-10 border-b border-outline-variant flex items-center px-md justify-between bg-black z-20 shrink-0">
+      <div className="h-10 border-b border-outline-variant flex items-center px-md justify-between bg-black z-20 shrink-0 w-full">
         <div className="font-code-table text-code-table text-on-surface font-bold">
           [ VIEW: DIGITAL TWIN TOPOLOGY ] ({nodes.length} NODES / {edges.length} EDGES)
         </div>
-        <div className="flex gap-sm">
+        <div className="flex gap-sm items-center">
+          <span className="font-code-table text-code-table text-outline mr-sm">
+            ZOOM: {(scale * 100).toFixed(0)}%
+          </span>
+          <button
+            onClick={() => { setScale(1); setPan({x: 0, y: 0}) }}
+            className="px-sm py-xs text-code-table font-code-table bg-black border border-outline-variant hover:bg-surface-container-high text-on-surface transition-none"
+          >
+            [ RESET VIEW ]
+          </button>
           <button
             onClick={fetchTopo}
             disabled={refreshing}
@@ -80,15 +95,47 @@ export default function CRDTView() {
         </div>
       </div>
 
-      <div className="flex-1 relative overflow-hidden flex">
+      <div className="flex-1 relative overflow-hidden flex w-full">
         {/* Network Topology SVG Area */}
-        <div className="flex-1 relative overflow-auto p-xl z-10">
-          <div className="relative border border-[#333] bg-black bg-opacity-80" style={{ width: W, height: H, minWidth: W, minHeight: H }}>
-            {nodes.length === 0 ? (
-              <div className="absolute inset-0 flex items-center justify-center font-code-table text-outline">LOADING TOPOLOGY...</div>
-            ) : (
-              <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${W} ${H}`}>
-                {/* Edges */}
+        <div 
+          className={`flex-1 relative overflow-hidden z-10 w-full h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          onWheel={(e) => {
+            const zoomSensitivity = 0.001
+            const delta = -e.deltaY * zoomSensitivity
+            setScale(s => Math.min(Math.max(0.1, s + delta), 5))
+          }}
+          onPointerDown={(e) => {
+            setIsDragging(true)
+            setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y })
+            e.currentTarget.setPointerCapture(e.pointerId)
+          }}
+          onPointerMove={(e) => {
+            if (isDragging) {
+              setPan({ x: e.clientX - dragStart.x, y: e.clientY - dragStart.y })
+            }
+          }}
+          onPointerUp={(e) => {
+            setIsDragging(false)
+            e.currentTarget.releasePointerCapture(e.pointerId)
+          }}
+          onPointerLeave={() => {
+            setIsDragging(false)
+          }}
+        >
+          <div 
+            className="absolute shadow-2xl transition-transform duration-75 ease-out"
+            style={{ 
+              top: '50%', left: '50%',
+              transform: `translate(calc(-50% + ${pan.x}px), calc(-50% + ${pan.y}px)) scale(${scale})`, 
+              width: W, height: H 
+            }}
+          >
+            <div className="relative border border-[#333] bg-black bg-opacity-80 w-full h-full">
+              {nodes.length === 0 ? (
+                <div className="absolute inset-0 flex items-center justify-center font-code-table text-outline">LOADING TOPOLOGY...</div>
+              ) : (
+                <svg ref={svgRef} width="100%" height="100%" viewBox={`0 0 ${W} ${H}`}>
+                  {/* Edges */}
                 {edges.map((e, i) => {
                   const s = pos[e.source], t = pos[e.target]
                   if (!s || !t) return null
@@ -133,6 +180,7 @@ export default function CRDTView() {
                 })}
               </svg>
             )}
+            </div>
           </div>
         </div>
 
