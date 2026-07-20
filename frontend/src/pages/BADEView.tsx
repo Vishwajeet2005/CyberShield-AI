@@ -137,7 +137,7 @@ export default function BADEView() {
         {/* Side Panel (Charts & Details) */}
         <div className="col-span-12 xl:col-span-4 flex flex-col gap-md h-full">
           {/* Trend Chart Module (Simplified) */}
-          <div className="border border-outline-variant bg-surface-container flex flex-col h-1/2">
+          <div className="border border-outline-variant bg-surface-container flex flex-col flex-1 min-h-0">
             <div className="border-b border-outline-variant p-sm bg-surface-container-high flex justify-between items-center">
               <span className="font-label-caps text-label-caps text-primary">[ GLOBAL ANOMALY TREND ]</span>
               <span className="font-code-table text-code-table text-outline">T-1H</span>
@@ -160,7 +160,7 @@ export default function BADEView() {
           </div>
 
           {/* Selected Entity Details */}
-          <div className="border border-outline-variant bg-surface-container flex flex-col h-1/2">
+          <div className="border border-outline-variant bg-surface-container flex flex-col flex-1 min-h-0">
             <div className="border-b border-outline-variant p-sm bg-primary text-on-primary flex justify-between items-center">
               <span className="font-label-caps text-label-caps font-bold">[ TARGET ACQUIRED ]</span>
               <span className="font-code-table text-code-table">{selected ? `ID: ${selected.entity_id}` : 'WAITING'}</span>
