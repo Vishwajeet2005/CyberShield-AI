@@ -11,11 +11,8 @@ interface Attribution {
 
 const API = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
-export default function AAPAView() {
-  const [attr, setAttr] = useState<Attribution | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
-  const [input, setInput] = useState(`{
+const PAYLOADS = {
+  default: `{
   "id": "SRV-PROD-042",
   "type": "server",
   "features": {
@@ -25,7 +22,38 @@ export default function AAPAView() {
     "protocol_type": "tcp",
     "flag": "SF"
   }
-}`)
+}`,
+  apt41: `{
+  "id": "WS-DEV-109",
+  "type": "workstation",
+  "features": {
+    "duration": 3600.0,
+    "src_bytes": 4500000,
+    "dst_bytes": 1024,
+    "protocol_type": "smb",
+    "flag": "S0",
+    "anomalous_processes": ["psexec.exe", "cmd.exe"]
+  }
+}`,
+  lazarus: `{
+  "id": "DB-MAIN-01",
+  "type": "database",
+  "features": {
+    "duration": 7200.0,
+    "src_bytes": 10500,
+    "dst_bytes": 999999999,
+    "protocol_type": "dns",
+    "flag": "SF",
+    "connection_state": "outbound_anomaly"
+  }
+}`
+}
+
+export default function AAPAView() {
+  const [attr, setAttr] = useState<Attribution | null>(null)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [input, setInput] = useState(PAYLOADS.default)
 
   const analyze = async () => {
     setLoading(true)
@@ -71,7 +99,14 @@ export default function AAPAView() {
           </div>
           <div className="p-md flex-1 flex flex-col">
             <div className="mb-sm">
-              <h2 className="font-headline-md text-headline-md mb-xs text-primary">Input Telemetry</h2>
+              <div className="flex justify-between items-end mb-xs">
+                <h2 className="font-headline-md text-headline-md text-primary">Input Telemetry</h2>
+                <div className="flex gap-xs">
+                  <button onClick={() => setInput(PAYLOADS.default)} className="text-[10px] border border-outline px-2 py-1 hover:bg-surface-container-high text-on-surface-variant font-code-table transition-colors">[ DEFAULT ]</button>
+                  <button onClick={() => setInput(PAYLOADS.apt41)} className="text-[10px] border border-outline px-2 py-1 hover:bg-surface-container-high text-on-surface-variant font-code-table transition-colors">[ APT41 - SMB ]</button>
+                  <button onClick={() => setInput(PAYLOADS.lazarus)} className="text-[10px] border border-outline px-2 py-1 hover:bg-surface-container-high text-on-surface-variant font-code-table transition-colors">[ LAZARUS - DNS ]</button>
+                </div>
+              </div>
               <p className="font-body-sm text-on-surface-variant mb-sm">Provide anomalous entity JSON payload for MITRE ATT&CK attribution.</p>
               {error && <div className="inline-block border border-error px-sm py-xs text-error text-code-table font-code-table">ERROR: {error}</div>}
             </div>
