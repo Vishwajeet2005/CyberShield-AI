@@ -31,6 +31,14 @@
 
 ---
 
+## 🔥 New Live Prototype Features
+*   **Fully Functional SOC-PRIME UI**: A cohesive, cyberpunk-styled interface across all modules with real-time React state management.
+*   **Groq + Chroma DB RAG Pipeline**: The AAPA module dynamically attributes Threat Actors using a local STIX knowledge base and LLaMA 3 via Groq for high-speed AI reasoning.
+*   **High-Volume Stress Testing**: A live stress-test generator that blasts 500+ asynchronous attacks at the FastAPI backend to prove robust state management.
+*   **Automated CERT-In Reporting**: The AIRO module generates compliant, exportable `.txt` incident reports for the Indian government.
+
+---
+
 ## 📋 Table of Contents
 
 - [Problem Statement](#-problem-statement)
@@ -565,9 +573,10 @@ pip install -r requirements.txt
 
 Create a `.env` file:
 ```env
-# No credentials needed for demo mode
-DEMO_MODE=true
-NVD_API_KEY=           # Optional: get free key at nvd.nist.gov/developers
+# Optional but highly recommended for AAPA RAG pipeline
+GROQ_API_KEY=your_groq_key_here
+# Optional: get free key at nvd.nist.gov/developers
+NVD_API_KEY=           
 CERT_IN_ORG=AIIMS Delhi
 ```
 
@@ -598,9 +607,17 @@ python demo/trigger_lateral_movement.py
 This simulates an APT41 lateral movement attack through the AIIMS network and demonstrates:
 1. **BADE** detecting anomalous behaviour within 60 seconds
 2. **AAPA** attributing to APT41 with 91% confidence
-3. **AIRO** executing 3 containment actions within 30 seconds
-4. **VPA** highlighting KEV CVEs on affected assets
-5. **CRDT** rendering the attack path in the Digital Twin
+3. **AIRO** generating an automated containment playbook (High Blast Radius requiring Approval)
+4. **Audit Log** immutably recording the event
+
+### 6. Run the Ultimate Stress Test
+
+To prove the prototype's resilience, open a new terminal and run:
+
+```bash
+python demo/stress_test.py
+```
+This floods the FastAPI backend with **500 concurrent, asynchronous attack incidents**, proving that the React UI and backend state manager will not crash under extreme load.
 
 ---
 
