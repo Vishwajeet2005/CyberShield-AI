@@ -60,6 +60,34 @@ export default function AIROView() {
     setApproving(null)
   }
 
+  const handleExportReport = () => {
+    if (!selected) return
+    const reportContent = `CERT-IN INCIDENT REPORT
+=======================
+INCIDENT ID: ${selected.id}
+TITLE: ${selected.title || 'N/A'}
+STATUS: ${selected.status}
+SEVERITY: ${selected.severity || 'UNKNOWN'}
+TIMESTAMP: ${new Date().toISOString()}
+
+AFFECTED ENTITIES:
+${(selected.affected_entities || []).map(e => `- ${e}`).join('\n')}
+
+ACTIONS LOGGED:
+${(selected.actions_taken || []).map(a => `[${a.status.toUpperCase()}] ${a.action_type} on ${a.target} (Blast Radius: ${a.blast_radius})`).join('\n')}
+
+=======================
+CyberShield AI Autonomous Incident Response Orchestrator
+`
+    const blob = new Blob([reportContent], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `CERT-IN_REPORT_${selected.id}.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const filtered = incidents.filter(i => (i.id + i.title + (i.affected_entities?.[0]||'')).toLowerCase().includes(filter.toLowerCase()))
 
   return (
@@ -165,6 +193,19 @@ export default function AIROView() {
             ))
           )}
         </div>
+
+        {/* Export Button Area */}
+        {selected && (
+          <div className="shrink-0 p-md border-t border-outline-variant bg-surface-container flex justify-end z-10">
+            <button 
+              onClick={handleExportReport}
+              className="bg-primary/10 text-primary border border-primary px-lg py-sm font-label-caps text-label-caps tracking-widest hover:bg-primary hover:text-black transition-none flex justify-center items-center gap-sm"
+            >
+              <span className="material-symbols-outlined text-sm">download</span>
+              [ EXPORT CERT-IN REPORT ]
+            </button>
+          </div>
+        )}
 
         {/* Human-in-the-loop Approval Gate */}
         {selected && (selected.actions_taken || []).some(a => a.status === 'awaiting_approval') && (
