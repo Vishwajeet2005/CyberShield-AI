@@ -70,7 +70,8 @@ export default function App() {
       {/* SideNavBar */}
       <nav className="w-64 shrink-0 h-screen bg-background dark:bg-background border-r border-outline-variant flex flex-col z-20">
         <div className="p-md border-b border-outline-variant flex flex-col gap-xs">
-          <h1 className="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary tracking-tighter glitch-text">SOC-PRIME</h1>
+          <div className="font-code-table text-code-table text-error tracking-widest">&gt; CYBERSHIELD AI</div>
+          <h1 className="font-headline-sm text-headline-sm font-bold text-primary dark:text-primary tracking-tighter glitch-text uppercase">SOC-PRIME</h1>
           <p className="font-code-table text-code-table text-on-surface-variant">NODE-01.SYSTEM.RESILIENCE</p>
         </div>
         <div className="flex-1 overflow-y-auto py-sm">
