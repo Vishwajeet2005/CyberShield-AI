@@ -88,7 +88,7 @@ export default function App() {
       </nav>
 
       {/* Main Content Area */}
-      <div className="flex-1 ml-64 flex flex-col h-screen">
+      <div className="flex-1 ml-64 flex flex-col h-screen min-w-0">
         {/* TopAppBar */}
         <header className="flex justify-between items-center h-12 px-md border-b border-outline-variant w-full bg-background dark:bg-background z-10 shrink-0 overflow-x-auto whitespace-nowrap">
           <div className="font-label-caps text-label-caps font-bold text-primary dark:text-primary flex items-center gap-2">
