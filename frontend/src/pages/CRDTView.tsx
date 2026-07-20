@@ -70,7 +70,7 @@ export default function CRDTView() {
       <div className="flex-1 relative overflow-hidden flex">
         {/* Network Topology SVG Area */}
         <div className="flex-1 relative overflow-auto p-xl z-10">
-          <div className="relative border border-[#333] bg-black bg-opacity-80 m-auto" style={{ width: W, height: H, minWidth: W, minHeight: H }}>
+          <div className="relative border border-[#333] bg-black bg-opacity-80" style={{ width: W, height: H, minWidth: W, minHeight: H }}>
             {nodes.length === 0 ? (
               <div className="absolute inset-0 flex items-center justify-center font-code-table text-outline">LOADING TOPOLOGY...</div>
             ) : (
