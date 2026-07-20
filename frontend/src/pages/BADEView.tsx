@@ -142,8 +142,8 @@ export default function BADEView() {
               <span className="font-label-caps text-label-caps text-primary">[ GLOBAL ANOMALY TREND ]</span>
               <span className="font-code-table text-code-table text-outline">T-1H</span>
             </div>
-            <div className="flex-1 p-sm relative">
-              <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 100 100">
+            <div className="flex-1 relative overflow-hidden min-h-0">
+              <svg className="absolute inset-sm w-[calc(100%-1rem)] h-[calc(100%-1rem)]" preserveAspectRatio="none" viewBox="0 0 100 100">
                 <line stroke="#353434" strokeDasharray="2,2" strokeWidth="0.5" x1="0" x2="100" y1="25" y2="25"></line>
                 <line stroke="#353434" strokeDasharray="2,2" strokeWidth="0.5" x1="0" x2="100" y1="50" y2="50"></line>
                 <line stroke="#353434" strokeDasharray="2,2" strokeWidth="0.5" x1="0" x2="100" y1="75" y2="75"></line>
