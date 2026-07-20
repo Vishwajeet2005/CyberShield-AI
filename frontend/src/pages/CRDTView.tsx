@@ -28,8 +28,7 @@ export default function CRDTView() {
 
   const [refreshing, setRefreshing] = useState(false)
 
-  // Zoom and Scroll Pan state
-  const [scale, setScale] = useState(1)
+  // Scroll Pan state
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0, scrollLeft: 0, scrollTop: 0 })
 
@@ -76,18 +75,6 @@ export default function CRDTView() {
           [ VIEW: DIGITAL TWIN TOPOLOGY ] ({nodes.length} NODES / {edges.length} EDGES)
         </div>
         <div className="flex gap-sm items-center">
-          <span className="font-code-table text-code-table text-outline mr-sm">
-            ZOOM: {(scale * 100).toFixed(0)}%
-          </span>
-          <button
-            onClick={() => { 
-              setScale(1); 
-              if(scrollRef.current) { scrollRef.current.scrollLeft = 0; scrollRef.current.scrollTop = 0; }
-            }}
-            className="px-sm py-xs text-code-table font-code-table bg-black border border-outline-variant hover:bg-surface-container-high text-on-surface transition-none"
-          >
-            [ RESET VIEW ]
-          </button>
           <button
             onClick={fetchTopo}
             disabled={refreshing}
@@ -103,13 +90,6 @@ export default function CRDTView() {
         <div 
           ref={scrollRef}
           className={`flex-1 relative overflow-auto z-10 w-full h-full ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-          onWheel={(e) => {
-            if (e.ctrlKey || e.metaKey) {
-              const zoomSensitivity = 0.005
-              const delta = -e.deltaY * zoomSensitivity
-              setScale(s => Math.min(Math.max(0.1, s + delta), 5))
-            }
-          }}
           onPointerDown={(e) => {
             if (e.button !== 0) return // Only left click drag
             setIsDragging(true)
@@ -137,19 +117,15 @@ export default function CRDTView() {
             setIsDragging(false)
           }}
         >
-          {/* Centering and Scaling Wrapper */}
+          {/* Centering Wrapper */}
           <div className="min-w-full min-h-full flex items-center justify-center p-xl">
             <div 
               className="relative shadow-2xl transition-all duration-75 ease-out"
-              style={{ width: W * scale, height: H * scale }}
+              style={{ width: W, height: H }}
             >
               <div 
                 className="relative border border-[#333] bg-black bg-opacity-80"
-                style={{ 
-                  transform: `scale(${scale})`, 
-                  transformOrigin: 'top left', 
-                  width: W, height: H 
-                }}
+                style={{ width: W, height: H }}
               >
               {nodes.length === 0 ? (
                 <div className="absolute inset-0 flex items-center justify-center font-code-table text-outline">LOADING TOPOLOGY...</div>
