@@ -33,17 +33,23 @@ export default function CRDTView() {
   }, [])
 
   // Minimal force-free layout — group by department, stack vertically
-  const W = 800, H = 600
   const departments = [...new Set(nodes.map(n => n.department))].filter(Boolean)
+  const W = Math.max(1200, departments.length * 160)
+  
+  const currentSegCount: Record<string, number> = {}
+  const segCount: Record<string, number> = {}
+  nodes.forEach(n => { segCount[n.department] = (segCount[n.department] ?? 0) + 1 })
+  const maxNodesInSeg = Math.max(0, ...Object.values(segCount))
+  const H = Math.max(700, maxNodesInSeg * 100 + 100)
+
   const segW = departments.length > 0 ? W / departments.length : W
 
   const pos: Record<string, { x: number; y: number }> = {}
-  const segCount: Record<string, number> = {}
   nodes.forEach(n => {
     const si = departments.indexOf(n.department)
-    const idx = segCount[n.department] ?? 0
-    segCount[n.department] = idx + 1
-    pos[n.id] = { x: (si + 0.5) * segW, y: 80 + idx * 80 }
+    const idx = currentSegCount[n.department] ?? 0
+    currentSegCount[n.department] = idx + 1
+    pos[n.id] = { x: (si + 0.5) * segW, y: 80 + idx * 100 }
   })
 
   const CRIT_COLOR: Record<string, string> = { CRITICAL: '#ffb4ab', HIGH: '#FFA500', MEDIUM: '#fdfdfc', LOW: '#3a7d44' }
@@ -64,7 +70,7 @@ export default function CRDTView() {
       <div className="flex-1 relative overflow-hidden flex">
         {/* Network Topology SVG Area */}
         <div className="flex-1 relative overflow-auto p-xl flex items-center justify-center z-10">
-          <div className="relative w-[800px] h-[600px] border border-[#333] bg-black bg-opacity-80">
+          <div className="relative border border-[#333] bg-black bg-opacity-80" style={{ width: W, height: H, minWidth: W, minHeight: H }}>
             {nodes.length === 0 ? (
               <div className="absolute inset-0 flex items-center justify-center font-code-table text-outline">LOADING TOPOLOGY...</div>
             ) : (
