@@ -31,11 +31,11 @@
 
 ---
 
-## 🔥 New Live Prototype Features
-*   **Fully Functional SOC-PRIME UI**: A cohesive, cyberpunk-styled interface across all modules with real-time React state management.
-*   **Groq + Chroma DB RAG Pipeline**: The AAPA module dynamically attributes Threat Actors using a local STIX knowledge base and LLaMA 3 via Groq for high-speed AI reasoning.
-*   **High-Volume Stress Testing**: A live stress-test generator that blasts 500+ asynchronous attacks at the FastAPI backend to prove robust state management.
-*   **Automated CERT-In Reporting**: The AIRO module generates compliant, exportable `.txt` incident reports for the Indian government.
+## Core Platform Capabilities (v1.0 Prototype)
+*   **Unified SOC-PRIME Interface**: A comprehensive, low-latency command center providing real-time state synchronization across all security modules.
+*   **AI-Driven Threat Attribution (RAG Pipeline)**: The AAPA module utilizes a Retrieval-Augmented Generation architecture (combining Chroma DB and high-throughput LLM inference via Groq) to dynamically map telemetry to MITRE ATT&CK STIX intelligence.
+*   **High-Concurrency Resilience Testing**: Includes an asynchronous load-generation framework designed to validate backend state management and frontend rendering under high-volume telemetry ingestion (>500 concurrent events).
+*   **Automated Compliance Reporting**: The AIRO module generates immutably logged, standardized incident reports compliant with CERT-In regulatory requirements.
 
 ---
 
@@ -610,14 +610,14 @@ This simulates an APT41 lateral movement attack through the AIIMS network and de
 3. **AIRO** generating an automated containment playbook (High Blast Radius requiring Approval)
 4. **Audit Log** immutably recording the event
 
-### 6. Run the Ultimate Stress Test
+### 6. Concurrency & Load Validation
 
-To prove the prototype's resilience, open a new terminal and run:
+To validate the platform's architectural resilience and state management capabilities, execute the high-concurrency load generator:
 
 ```bash
 python demo/stress_test.py
 ```
-This floods the FastAPI backend with **500 concurrent, asynchronous attack incidents**, proving that the React UI and backend state manager will not crash under extreme load.
+This script simulates a massive, synchronized distributed attack, generating **500 concurrent asynchronous incidents** to benchmark the FastAPI event loop and React frontend responsiveness under extreme operational load.
 
 ---
 
