@@ -141,7 +141,7 @@ async def body_guard(request: Request, call_next):
 # CORS — allow React dev server
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[config.FRONTEND_URL, config.FRONTEND_URL_ALT, "http://localhost:5174"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
