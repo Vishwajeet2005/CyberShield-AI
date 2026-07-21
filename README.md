@@ -109,7 +109,7 @@ CyberShield AI:    Detection in minutes →  Containment in 30s ✅
 │                              CYBERSHIELD AI — 5-LAYER ARCHITECTURE                  │
 ├─────────────────────────────────────────────────────────────────────────────────────┤
 │  LAYER 5 │ PRESENTATION                                                             │
-│          │  React SOC Dashboard  │  Digital Twin Viewer  │  Executive Dashboard    │
+│          │  React SOC Dashboard  │  Digital Twin Viewer  │  Executive Dashboard     │
 │          │  Investigation Workbench  │  Mobile Approval App (iOS/Android)           │
 ├──────────┼──────────────────────────────────────────────────────────────────────────┤
 │  LAYER 4 │ RESPONSE ORCHESTRATION                                                   │
@@ -117,14 +117,14 @@ CyberShield AI:    Detection in minutes →  Containment in 30s ✅
 │          │  Immutable Evidence Vault (Hash-Chained Audit Log)                       │
 ├──────────┼──────────────────────────────────────────────────────────────────────────┤
 │  LAYER 3 │ INTELLIGENCE ENGINES                                                     │
-│          │  BADE (Anomaly)  │  AAPA (Attribution)  │  VPA (Vulns)  │  CRDT (Twin)  │
+│          │  BADE (Anomaly)  │  AAPA (Attribution)  │  VPA (Vulns)  │  CRDT (Twin)   │
 │          │  ←────────── Kafka Event Bus (100K+ events/sec) ──────────→              │
 ├──────────┼──────────────────────────────────────────────────────────────────────────┤
 │  LAYER 2 │ DATA PIPELINE                                                            │
-│          │  Apache Kafka  →  Normalisation & Enrichment  →  ClickHouse + Neo4j     │
+│          │  Apache Kafka  →  Normalisation & Enrichment  →  ClickHouse + Neo4j      │
 ├──────────┼──────────────────────────────────────────────────────────────────────────┤
 │  LAYER 1 │ DATA COLLECTION                                                          │
-│          │  Endpoint Agents  │  Network TAP/SPAN  │  OT Data Diodes                │
+│          │  Endpoint Agents  │  Network TAP/SPAN  │  OT Data Diodes                 │
 │          │  SIEM Connectors  │  Cloud APIs (AWS/Azure/GCP)                          │
 └─────────────────────────────────────────────────────────────────────────────────────┘
 ```
@@ -224,8 +224,8 @@ Observed TTPs (from BADE alerts)
         │
         ▼
 ┌───────────────────────────────────────────┐
-│  MITRE ATT&CK Knowledge Graph (Neo4j)    │
-│  700+ techniques, Enterprise+ICS+Mobile  │
+│  MITRE ATT&CK Knowledge Graph (Neo4j)     │
+│  700+ techniques, Enterprise+ICS+Mobile   │
 └──────────────────────┬────────────────────┘
                        │
         ┌──────────────▼──────────────┐
@@ -283,17 +283,17 @@ Observed TTPs (from BADE alerts)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    BLAST RADIUS TIERS                        │
+│                    BLAST RADIUS TIERS                       │
 ├──────────────┬──────────────────────────────────────────────┤
-│   LOW      │  Auto-execute immediately                    │
+│   LOW      │  Auto-execute immediately                      │
 │              │  Examples: block IP, revoke session token,   │
 │              │  disable single account                      │
 ├──────────────┼──────────────────────────────────────────────┤
-│   MEDIUM   │  Execute + notify SOC analyst                │
+│   MEDIUM   │  Execute + notify SOC analyst                  │
 │              │  Examples: isolate endpoint, snapshot VM,    │
 │              │  force password reset                        │
 ├──────────────┼──────────────────────────────────────────────┤
-│   HIGH     │  Require human approval (NEVER auto-execute) │
+│   HIGH     │  Require human approval (NEVER auto-execute)   │
 │              │  Examples: segment isolation, OT shutdown,   │
 │              │  full domain lockdown                        │
 │              │  10-min primary timeout → secondary escalate │
@@ -831,18 +831,18 @@ T+10:00 CERT-In incident report auto-generated ✅
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│              Kubernetes Cluster                      │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
-│  │  BADE    │  │  BADE    │  │  BADE    │  (n pods)│
-│  │  Pod 1   │  │  Pod 2   │  │  Pod 3   │          │
-│  └──────────┘  └──────────┘  └──────────┘          │
-│       ↑              ↑              ↑                │
+│              Kubernetes Cluster                     │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │  BADE    │  │  BADE    │  │  BADE    │  (n pods) │
+│  │  Pod 1   │  │  Pod 2   │  │  Pod 3   │           │
+│  └──────────┘  └──────────┘  └──────────┘           │
+│       ↑              ↑              ↑               │
 │  ─────────────── Kafka Bus ─────────────────        │
-│       ↓              ↓              ↓                │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
-│  │ClickHouse│  │ClickHouse│  │ClickHouse│ (sharded)│
-│  │ Shard 1  │  │ Shard 2  │  │ Shard 3  │          │
-│  └──────────┘  └──────────┘  └──────────┘          │
+│       ↓              ↓              ↓               │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐           │
+│  │ClickHouse│  │ClickHouse│  │ClickHouse│ (sharded) │
+│  │ Shard 1  │  │ Shard 2  │  │ Shard 3  │           │
+│  └──────────┘  └──────────┘  └──────────┘           │
 └─────────────────────────────────────────────────────┘
 ```
 
