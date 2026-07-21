@@ -69,11 +69,11 @@ India's Critical National Infrastructure (CNI) — hospitals, power grids, educa
 
 | Statistic | Impact |
 |-----------|--------|
-| **1.59M+**incidents handled by CERT-In in 2023 | Unprecedented scale |
-| **AIIMS Delhi**paralysed for 2 weeks (ransomware, Nov 2022) | Patient lives at risk |
-| **CBSE**attacked ahead of board exams (2026) | Student data of millions compromised |
-| **70%+**of govt entities run on end-of-life IT | Massive unpatched attack surface |
-| **Weeks to months**average breach detection time | Attackers operate undetected |
+| **1.59M+** incidents handled by CERT-In in 2023 | Unprecedented scale |
+| **AIIMS Delhi** paralysed for 2 weeks (ransomware, Nov 2022) | Patient lives at risk |
+| **CBSE** attacked ahead of board exams (2026) | Student data of millions compromised |
+| **70%+** of govt entities run on end-of-life IT | Massive unpatched attack surface |
+| **Weeks to months** average breach detection time | Attackers operate undetected |
 
 **The core gap**: Signature-based tools cannot detect APTs (Advanced Persistent Threats) that operate at low-and-slow speeds, blend into normal traffic, and exploit legitimate credentials. By the time a breach is discovered, the damage is done.
 
