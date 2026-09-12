@@ -5,9 +5,6 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import StreamingResponse
 from utils.simulator import simulator
 from utils.audit_log import check_integrity, total_entries
-from db.clickhouse_client import get_real_metrics, is_available as ch_available
-from services import neo4j_service
-from kafka.pipeline import kafka_producer
 import config
 import uuid
 import time
@@ -48,9 +45,9 @@ async def system_status():
         "overall_status": "operational",
         "uptime_hours": metrics["uptime_hours"],
         "infrastructure": {
-            "neo4j":      neo4j_service.is_available(),
-            "kafka":      kafka_producer._available,
-            "clickhouse": ch_available(),
+            "neo4j":      False,
+            "kafka":      False,
+            "clickhouse": False,
             "pytorch_ae": True,   # Autoencoder scorer is always loaded if model exists
         },
         "modules": [
@@ -59,7 +56,7 @@ async def system_status():
             {"name": "AIRO", "status": "operational", "last_heartbeat": now},
             {"name": "VPA",  "status": "operational", "last_heartbeat": now},
             {"name": "CRDT", "status": "operational", "last_heartbeat": now,
-             "graph_engine": "neo4j" if neo4j_service.is_available() else "networkx"},
+             "graph_engine": "networkx"},
         ],
         "timestamp": now,
         "audit_log": {
@@ -71,19 +68,7 @@ async def system_status():
 @router.get("/api/system/metrics")
 async def system_metrics():
     base = simulator.get_metrics()
-
-    # Enrich with real ClickHouse analytics if available
-    if ch_available():
-        ch_metrics = get_real_metrics()
-        if ch_metrics:
-            base["mttd"]            = ch_metrics.get("mttd", base.get("mttd_hours"))
-            base["mttr"]            = ch_metrics.get("mttr", base.get("mttr_hours"))
-            base["alerts_24h"]      = ch_metrics.get("alerts_24h", base.get("alerts_today"))
-            base["avg_anomaly_score"] = ch_metrics.get("avg_anomaly_score")
-            base["metrics_source"]  = "clickhouse"
-    else:
-        base["metrics_source"] = "in_memory"
-
+    base["metrics_source"] = "in_memory"
     return base
 
 @router.get("/api/events/stream")
@@ -100,9 +85,9 @@ async def event_stream():
                 "metrics":      metrics,
                 "alert_count":  len(alerts),
                 "infrastructure": {
-                    "neo4j":      neo4j_service.is_available(),
-                    "kafka":      kafka_producer._available,
-                    "clickhouse": ch_available(),
+                    "neo4j":      False,
+                    "kafka":      False,
+                    "clickhouse": False,
                 }
             }
             yield f"data: {json.dumps(payload)}\n\n"

@@ -1,7 +1,6 @@
 ﻿aiofiles==25.1.0
 aiohappyeyeballs==2.6.1
 aiohttp==3.14.1
-aiokafka==0.14.0
 aiosignal==1.4.0
 annotated-doc==0.0.4
 annotated-types==0.7.0
@@ -13,7 +12,6 @@ attrs==25.4.0
 bandit==1.9.4
 bash==0.6
 bcrypt==5.0.0
-beautifulsoup4==4.14.3
 bitarray==3.8.0
 bleach==6.4.0
 blinker==1.9.0
@@ -25,8 +23,6 @@ chromadb==1.5.9
 ckzg==2.1.7
 classified-agent==1.0.0
 click==8.4.2
-clickhouse-connect==1.5.0
-clickhouse-driver==0.2.10
 colorama==0.4.6
 contourpy==1.3.3
 cryptography==46.0.5
@@ -37,9 +33,7 @@ Deprecated==1.3.1
 distro==1.9.0
 docstring_parser==0.17.0
 durationpy==0.10
-earthengine-api==1.7.30
 et_xmlfile==2.0.0
-eth-account==0.13.7
 eth-hash==0.7.1
 eth-keyfile==0.8.1
 eth-keys==0.7.0
@@ -51,8 +45,6 @@ fastapi==0.136.1
 fastjsonschema==2.21.2
 filelock==3.25.1
 flake8==7.3.0
-Flask==3.1.3
-flask-cors==6.0.2
 flatbuffers==25.12.19
 fonttools==4.62.1
 frozendict==2.4.7
@@ -64,7 +56,6 @@ google-api-python-client==2.197.0
 google-auth==2.53.0
 google-auth-httplib2==0.4.0
 google-cloud-core==2.6.0
-google-cloud-storage==3.11.0
 google-crc32c==1.8.0
 google-resumable-media==2.10.0
 googleapis-common-protos==1.75.0
@@ -95,15 +86,11 @@ jsonschema==4.26.0
 jsonschema-specifications==2025.9.1
 jupyter_core==5.9.1
 jupytext==1.19.3
-kafka-python==2.3.2
-kaggle==2.2.1
 kagglesdk==0.1.28
 keyring==25.7.0
 kiwisolver==1.5.0
-kubernetes==36.0.3
 limits==5.8.0
 lz4==4.4.5
-markdown-it-py==4.0.0
 MarkupSafe==3.0.3
 mccabe==0.7.0
 mdit-py-plugins==0.6.1
@@ -115,7 +102,6 @@ mpmath==1.3.0
 multidict==6.7.1
 multitasking==0.0.13
 nbformat==5.10.4
-neo4j==6.2.0
 networkx==3.6.1
 numpy==2.4.3
 oauthlib==3.3.1
@@ -142,7 +128,6 @@ prometheus_client==0.25.0
 propcache==0.4.1
 proto-plus==1.28.0
 protobuf==7.35.0
-psycopg2-binary==2.9.12
 pyasn1==0.6.3
 pyasn1_modules==0.4.2
 pybase64==1.4.3
@@ -170,7 +155,6 @@ PyYAML==6.0.3
 redis==8.0.0
 referencing==0.37.0
 regex==2026.2.28
-reportlab==4.5.1
 requests==2.34.2
 requests-oauthlib==2.0.0
 reverse_geocoder==1.5.1
@@ -209,12 +193,10 @@ uritemplate==4.2.0
 urllib3==2.6.3
 uvicorn==0.47.0
 watchfiles==1.2.0
-web3==7.14.1
 webencodings==0.5.1
 websocket-client==1.9.0
 websockets==15.0.1
 Werkzeug==3.1.6
 wrapt==2.2.1
 yarl==1.23.0
-yfinance==1.3.0
 zstandard==0.25.0
